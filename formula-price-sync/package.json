@@ -1,0 +1,19 @@
+{
+  "name": "formula-price-sync",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Formula Price Sync – WooCommerce gold & currency formula pricing",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:login": "playwright test admin-login",
+    "test:e2e:settings": "playwright test plugin-settings",
+    "test:e2e:menu": "playwright test plugin-menu",
+    "test:smoke": "php tests/run-smoke.php",
+    "test:r07": "php tests/run-r07r08.php"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

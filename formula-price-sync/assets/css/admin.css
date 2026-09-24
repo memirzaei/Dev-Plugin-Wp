@@ -1,0 +1,528 @@
+/**
+ * Formula Price Sync – Admin UI (simple · light · RTL · Tanha local)
+ * v2.0.4
+ */
+
+/* Tanha (local) — Farsi Digits · woff2 first · font-display:swap */
+@font-face {
+	font-family: "Tanha";
+	src: url("../fonts/tanha/Tanha-FD.woff2") format("woff2"),
+	     url("../fonts/tanha/Tanha-FD.woff") format("woff");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+:root {
+	--fps-bg: #f6f7f9;
+	--fps-surface: #ffffff;
+	--fps-border: #e5e7eb;
+	--fps-text: #111827;
+	--fps-muted: #6b7280;
+	--fps-primary: #d97706;
+	--fps-primary-hover: #b45309;
+	--fps-primary-soft: #fff7ed;
+	--fps-success: #059669;
+	--fps-success-soft: #ecfdf5;
+	--fps-error: #dc2626;
+	--fps-error-soft: #fef2f2;
+	--fps-radius: 10px;
+	--fps-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+	--fps-gap: 16px;
+	/* legacy aliases used in PHP inline styles */
+	--fps-color-accent: var(--fps-primary);
+	--fps-color-accent-soft: var(--fps-primary-soft);
+	--fps-color-primary: var(--fps-primary);
+	--fps-gap-lg: 20px;
+}
+
+/* Shell */
+.fps-admin-wrap {
+	max-width: 920px;
+	margin: 12px 0 40px;
+	color: var(--fps-text);
+	font-family: "Tanha", Tahoma, "Segoe UI", sans-serif;
+	font-size: 14px;
+	line-height: 1.7;
+	-webkit-font-smoothing: antialiased;
+}
+.fps-admin-wrap *,
+.fps-admin-wrap *::before,
+.fps-admin-wrap *::after {
+	box-sizing: border-box;
+}
+
+/* Typography: inherit Tanha across FPS admin surfaces */
+.fps-admin-wrap,
+.fps-admin-wrap input,
+.fps-admin-wrap select,
+.fps-admin-wrap textarea,
+.fps-admin-wrap button,
+.fps-admin-wrap .button,
+.fps-admin-wrap .fps-btn,
+.fps-admin-wrap table {
+	font-family: "Tanha", Tahoma, "Segoe UI", sans-serif;
+}
+
+
+/* Header */
+.fps-page-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0 0 20px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+}
+.fps-page-header h1 {
+	margin: 0;
+	padding: 0;
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: var(--fps-text);
+	line-height: 1.3;
+}
+.fps-logo-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	background: var(--fps-primary-soft);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+.fps-logo-icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+/* Layout */
+.fps-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--fps-gap);
+}
+@media (min-width: 782px) {
+	.fps-grid {
+		grid-template-columns: 1fr 1fr;
+	}
+	.fps-grid > .fps-card-wide,
+	.fps-grid > .fps-span-2 {
+		grid-column: 1 / -1;
+	}
+}
+
+/* Cards */
+.fps-card {
+	background: var(--fps-surface);
+	border: 1px solid var(--fps-border);
+	border-radius: var(--fps-radius);
+	box-shadow: var(--fps-shadow);
+	padding: 16px 18px;
+}
+.fps-card-title {
+	margin: 0 0 12px;
+	padding: 0 0 10px;
+	border-bottom: 1px solid var(--fps-border);
+	font-size: 0.95rem;
+	font-weight: 650;
+	color: var(--fps-text);
+}
+.fps-card p {
+	margin: 0 0 12px;
+	color: var(--fps-muted);
+}
+.fps-card p:last-child {
+	margin-bottom: 0;
+}
+
+/* Stats */
+.fps-dashboard-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 10px;
+}
+.fps-stat-card {
+	background: var(--fps-bg);
+	border: 1px solid var(--fps-border);
+	border-radius: 8px;
+	padding: 12px;
+	text-align: center;
+}
+.fps-stat-number {
+	display: block;
+	font-size: 1.15rem;
+	font-weight: 700;
+	color: var(--fps-text);
+	font-variant-numeric: tabular-nums;
+	direction: ltr;
+}
+.fps-stat-label {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+	color: var(--fps-muted);
+}
+
+/* Tables */
+.fps-rates-table,
+.fps-admin-wrap table.widefat {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid var(--fps-border);
+	border-radius: 8px;
+	overflow: hidden;
+	background: var(--fps-surface);
+}
+.fps-rates-table th,
+.fps-rates-table td,
+.fps-admin-wrap table.widefat th,
+.fps-admin-wrap table.widefat td {
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--fps-border);
+	text-align: right;
+}
+.fps-rates-table th,
+.fps-admin-wrap table.widefat th {
+	background: var(--fps-bg);
+	font-weight: 600;
+	font-size: 12px;
+	color: var(--fps-muted);
+}
+.fps-rates-table tr:last-child td,
+.fps-admin-wrap table.widefat tr:last-child td {
+	border-bottom: 0;
+}
+
+/* Provider list */
+.fps-provider-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.fps-provider-list li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--fps-border);
+	color: var(--fps-muted);
+}
+.fps-provider-list li:last-child {
+	border-bottom: 0;
+}
+.fps-provider-list li.fps-active {
+	color: var(--fps-text);
+	font-weight: 600;
+}
+.fps-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #d1d5db;
+	flex-shrink: 0;
+}
+.fps-provider-list li.fps-active .fps-dot {
+	background: var(--fps-success);
+	box-shadow: 0 0 0 3px var(--fps-success-soft);
+}
+
+/* Buttons */
+.fps-btn,
+.fps-admin-wrap .button.fps-btn,
+.fps-admin-wrap .button-primary.fps-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 36px;
+	padding: 0 14px;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: none;
+	line-height: 1.2;
+	transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.fps-btn-primary,
+.fps-admin-wrap .button-primary.fps-btn-primary {
+	background: var(--fps-primary) !important;
+	border-color: var(--fps-primary) !important;
+	color: #fff !important;
+}
+.fps-btn-primary:hover,
+.fps-admin-wrap .button-primary.fps-btn-primary:hover {
+	background: var(--fps-primary-hover) !important;
+	border-color: var(--fps-primary-hover) !important;
+	color: #fff !important;
+}
+.fps-btn-secondary {
+	background: var(--fps-surface);
+	border-color: var(--fps-border);
+	color: var(--fps-text);
+}
+.fps-btn-secondary:hover {
+	background: var(--fps-bg);
+	border-color: #cbd5e1;
+	color: var(--fps-text);
+}
+
+/* Quick links */
+.fps-quick-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 12px;
+}
+.fps-quick-links a {
+	display: inline-flex;
+	align-items: center;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: var(--fps-bg);
+	border: 1px solid var(--fps-border);
+	color: var(--fps-text);
+	text-decoration: none;
+	font-size: 12px;
+	font-weight: 500;
+}
+.fps-quick-links a:hover {
+	border-color: var(--fps-primary);
+	color: var(--fps-primary);
+	background: var(--fps-primary-soft);
+}
+
+/* Notices */
+.fps-admin-wrap .notice,
+.fps-license-warning,
+.fps-alert {
+	border-radius: 8px;
+	border: 1px solid var(--fps-border);
+	padding: 12px 14px;
+	margin: 0 0 16px;
+}
+.fps-license-warning,
+.fps-alert-error {
+	background: var(--fps-error-soft);
+	border-color: #fecaca;
+	color: #991b1b;
+}
+.fps-alert-success {
+	background: var(--fps-success-soft);
+	border-color: #a7f3d0;
+	color: #065f46;
+}
+.fps-muted,
+.fps-desc,
+.fps-admin-wrap .description {
+	color: var(--fps-muted) !important;
+	font-size: 12px;
+}
+.fps-error {
+	color: var(--fps-error);
+}
+
+/* Unit switcher */
+.fps-unit-switcher {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	margin: 0 0 16px;
+	background: var(--fps-surface);
+	border: 1px solid var(--fps-border);
+	border-radius: 999px;
+	box-shadow: var(--fps-shadow);
+}
+.fps-unit-switcher label {
+	margin: 0;
+	font-size: 12px;
+	color: var(--fps-muted);
+}
+.fps-unit-switcher select,
+.fps-unit-switcher .button {
+	min-height: 28px;
+	margin: 0;
+}
+
+/* Forms / settings */
+.fps-admin-wrap form .form-table {
+	margin-top: 0;
+	background: var(--fps-surface);
+	border: 1px solid var(--fps-border);
+	border-radius: var(--fps-radius);
+	box-shadow: var(--fps-shadow);
+	padding: 8px 12px;
+}
+.fps-admin-wrap form .form-table th {
+	padding: 14px 12px 14px 0;
+	width: 200px;
+	font-weight: 600;
+	color: var(--fps-text);
+}
+.fps-admin-wrap form .form-table td {
+	padding: 12px;
+}
+.fps-admin-wrap form h2 {
+	margin: 24px 0 10px;
+	font-size: 1rem;
+	font-weight: 700;
+}
+.fps-admin-wrap input[type="text"],
+.fps-admin-wrap input[type="password"],
+.fps-admin-wrap input[type="number"],
+.fps-admin-wrap select,
+.fps-admin-wrap textarea {
+	border-radius: 8px;
+	border-color: var(--fps-border);
+	min-height: 36px;
+	box-shadow: none;
+}
+.fps-admin-wrap input:focus,
+.fps-admin-wrap select:focus,
+.fps-admin-wrap textarea:focus {
+	border-color: var(--fps-primary);
+	box-shadow: 0 0 0 2px var(--fps-primary-soft);
+}
+.fps-radio-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: 12px;
+	margin-bottom: 6px;
+}
+
+/* License form compact */
+.fps-license-form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+.fps-license-form input[type="text"] {
+	flex: 1 1 220px;
+	max-width: 100%;
+}
+
+/* Health / history pages */
+.fps-health-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: var(--fps-gap);
+}
+
+/* Product metabox (keep usable, light) */
+.fps-metabox,
+#fps_product_data,
+.fps-product-panel {
+	font-size: 13px;
+}
+.fps-metabox .form-field,
+.fps-product-panel .form-field {
+	margin-bottom: 10px;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+	.fps-btn,
+	.fps-quick-links a {
+		transition: none;
+	}
+}
+
+
+/* ===== v1.0.0 polish: headings, spacing, metabox, unit switcher ===== */
+.fps-admin-wrap h1,
+.fps-admin-wrap .fps-page-header h1 {
+	font-family: "Tanha", Tahoma, sans-serif;
+	font-weight: 700;
+	font-size: 1.4rem;
+	letter-spacing: -0.01em;
+}
+.fps-admin-wrap h2,
+.fps-admin-wrap .fps-card-title {
+	font-family: "Tanha", Tahoma, sans-serif;
+	font-weight: 700;
+}
+
+/* Unit switcher — clear clickable pills */
+.fps-unit-switcher,
+.fps-unit-btns {
+	display: inline-flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	padding: 4px;
+	background: var(--fps-bg);
+	border: 1px solid var(--fps-border);
+	border-radius: 999px;
+}
+.fps-unit-btn {
+	border: 0;
+	background: transparent;
+	padding: 8px 14px;
+	border-radius: 999px;
+	cursor: pointer;
+	font-family: "Tanha", Tahoma, sans-serif;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--fps-muted);
+}
+.fps-unit-btn.active,
+.fps-unit-btn[aria-pressed="true"] {
+	background: var(--fps-primary);
+	color: #fff;
+}
+.fps-unit-btn:hover:not(.active) {
+	background: var(--fps-primary-soft);
+	color: var(--fps-primary);
+}
+
+/* Formula hint / metabox polish (WooCommerce product panel) */
+.fps-formula-hint,
+#fps-formula-hint {
+	margin: 12px 0 16px;
+	padding: 12px 14px;
+	background: #fff7ed;
+	border: 1px solid #fed7aa;
+	border-radius: 10px;
+	color: #9a3412;
+	font-size: 12.5px;
+	line-height: 1.7;
+}
+#woocommerce-product-data .fps-tax-field,
+#woocommerce-product-data .fps-currency-tax-mode,
+#woocommerce-product-data .fps-profit-field,
+#woocommerce-product-data .fps-base-amount-row {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+#woocommerce-product-data .fps-currency-tax-mode .description {
+	display: block;
+	margin-top: 6px;
+	line-height: 1.6;
+}
+
+/* Bulk result notice */
+#fps-bulk-result .notice {
+	margin: 14px 0 0;
+	padding: 12px 14px;
+	border-radius: 8px;
+}
+#fps-bulk-status {
+	display: block;
+	margin-top: 8px;
+	font-weight: 600;
+}
+
+/* History jalali inputs */
+#fps_csv_start_date,
+#fps_csv_end_date {
+	max-width: 180px;
+	direction: ltr;
+	text-align: left;
+}

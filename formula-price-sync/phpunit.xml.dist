@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+	bootstrap="tests/bootstrap/bootstrap.php"
+	colors="true"
+	cacheResult="false"
+	beStrictAboutOutputDuringTests="true"
+	beStrictAboutTestsThatDoNotTestAnything="true"
+	failOnRisky="true"
+	failOnWarning="true"
+	verbose="true"
+>
+	<testsuites>
+		<testsuite name="Unit">
+			<directory suffix="Test.php">tests/Unit</directory>
+		</testsuite>
+		<testsuite name="Integration">
+			<directory suffix="Test.php">tests/Integration</directory>
+		</testsuite>
+	</testsuites>
+
+	<coverage processUncoveredFiles="false">
+		<include>
+			<directory suffix=".php">includes</directory>
+		</include>
+		<exclude>
+			<directory>includes/Admin</directory>
+			<directory>vendor</directory>
+		</exclude>
+	</coverage>
+
+	<php>
+		<const name="ABSPATH" value="/tmp/fps-tests/"/>
+		<const name="FPS_VERSION" value="2.0.0"/>
+		<ini name="error_reporting" value="-1"/>
+		<ini name="display_errors" value="1"/>
+	</php>
+</phpunit>

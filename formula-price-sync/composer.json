@@ -1,0 +1,48 @@
+{
+  "name": "webgraphx/formula-price-sync",
+  "description": "Formula Price Sync / طلا ارز پرو – WooCommerce gold & currency formula pricing for Iranian markets",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "WebGraphx",
+      "homepage": "https://webgraphx.ir"
+    }
+  ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+    "phpunit/phpunit": "^9.6",
+    "squizlabs/php_codesniffer": "^3.10",
+    "wp-coding-standards/wpcs": "^3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "FormulaPriceSync\\": "includes/"
+    },
+    "classmap": [
+      "includes/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "FormulaPriceSync\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "php tests/run-smoke.php",
+    "test:hpos": "php tests/smoke-install-hpos.php",
+    "test:phpunit": "phpunit --configuration phpunit.xml.dist",
+    "build": "bash bin/build-release.sh",
+    "lint:phpcs": "phpcs --standard=phpcs.xml.dist --report=full"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  },
+  "minimum-stability": "stable"
+}
