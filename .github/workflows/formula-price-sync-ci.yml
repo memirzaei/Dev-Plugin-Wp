@@ -1,0 +1,346 @@
+# ==============================================================================
+# Formula Price Sync – Continuous Integration
+# ==============================================================================
+# Automates:
+#   1. PHP syntax / smoke unit checks
+#   2. HPOS smoke-install harness
+#   3. Mandatory PHPUnit + PHPCS + MySQL CAS + WP/WC/HPOS + metadata/reproducibility gates
+#   4. Release ZIP build (artefact upload)
+#
+# Secrets (optional, never required for fail-closed smoke):
+#   FPS_ZHAKET_PRODUCT_TOKEN – only if you add live-license jobs later
+#
+# Trigger: push / pull_request on main branches + manual dispatch
+# ==============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop, 'release/**']
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: 'Skip release ZIP build'
+        required: false
+        default: 'false'
+        type: boolean
+
+defaults:
+  run:
+    working-directory: ./formula-price-sync
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Static + smoke (no WordPress DB required)
+  # ----------------------------------------------------------------------------
+  smoke:
+    name: Smoke (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.1', '8.2', '8.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+          ini-values: display_errors=On, error_reporting=E_ALL
+
+      - name: Ensure Composer platform stub
+        run: |
+          mkdir -p vendor/composer
+          if [ ! -f vendor/composer/platform_check.php ]; then
+            echo '<?php' > vendor/composer/platform_check.php
+          fi
+
+      - name: PHP syntax check (production)
+        run: |
+          set -e
+          find includes formula-price-sync.php uninstall.php -name '*.php' -print0 \
+            | xargs -0 -n1 php -l
+
+      - name: PHP syntax check (tests)
+        run: |
+          set -e
+          find tests -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Unit smoke runner
+        run: |
+          php tests/run-smoke.php
+          php tests/run-r07r08.php
+          php tests/run-r09r11r12r13.php
+
+      - name: Install Composer dev dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: PHPCS
+        run: composer run lint:phpcs
+
+      - name: Metadata consistency
+        run: bash bin/check-metadata-consistency.sh
+
+      - name: HPOS smoke-install harness
+        run: php tests/smoke-install-hpos.php
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Mandatory PHPUnit
+  # ----------------------------------------------------------------------------
+  phpunit:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    needs: smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install Composer dev dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Ensure autoload / platform stub
+        run: |
+          mkdir -p vendor/composer
+          if [ ! -f vendor/composer/platform_check.php ]; then
+            echo '<?php' > vendor/composer/platform_check.php
+          fi
+          # Keep existing classmap autoload for plugin namespaces
+          if [ ! -f vendor/autoload.php ]; then
+            echo "Vendor autoload missing – plugin release vendor should be committed or generated"
+            exit 1
+          fi
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --configuration phpunit.xml.dist --no-coverage
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Mandatory real MySQL CAS concurrency
+  # ----------------------------------------------------------------------------
+  mysql-concurrency:
+    name: Real MySQL CAS concurrency
+    runs-on: ubuntu-latest
+    needs: smoke
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: fps_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli, pcntl
+          coverage: none
+      - name: Run real MySQL CAS gate
+        env:
+          FPS_INTEGRATION_MYSQL: '1'
+          FPS_DB_HOST: 127.0.0.1
+          FPS_DB_PORT: 3306
+          FPS_DB_USER: root
+          FPS_DB_PASS: root
+          FPS_DB_NAME: fps_test
+        run: php tests/Integration/real-mysql-cas.php
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Build marketplace ZIP
+  # ----------------------------------------------------------------------------
+  build:
+    name: Build release ZIP
+    runs-on: ubuntu-latest
+    needs: [smoke, phpunit, mysql-concurrency, wp-integration]
+    if: ${{ github.event_name != 'pull_request' && github.event.inputs.skip_build != 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Install rsync (for build-release.sh)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rsync zip
+
+      - name: Ensure platform stub
+        run: |
+          mkdir -p vendor/composer
+          if [ ! -f vendor/composer/platform_check.php ]; then
+            echo '<?php' > vendor/composer/platform_check.php
+          fi
+
+      - name: Install Composer dev dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Make build script executable
+        run: chmod +x bin/build-release.sh
+
+      - name: Replace test dependencies with production dependencies
+        run: composer install --no-interaction --prefer-dist --no-dev
+
+      - name: Build release package
+        env:
+          # Tests already passed in the required PHPUnit job.
+          FPS_TESTS_ALREADY_PASSED: '1'
+          # Token must NEVER be written into the zip. build-release.sh only reports presence.
+          FPS_ZHAKET_PRODUCT_TOKEN: ${{ secrets.FPS_ZHAKET_PRODUCT_TOKEN }}
+        run: bash bin/build-release.sh
+
+      - name: Verify reproducible release build
+        run: bash bin/check-release-reproducibility.sh
+
+      - name: Verify release metadata
+        run: bash bin/check-metadata-consistency.sh
+
+      - name: Upload ZIP artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formula-price-sync-2.0.0
+          path: build/formula-price-sync-2.0.0.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  # ----------------------------------------------------------------------------
+  # Job 4: Mandatory WordPress + WooCommerce + HPOS matrix
+  # ----------------------------------------------------------------------------
+  wp-integration:
+    name: WP + WooCommerce (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2']
+        wp: ['6.4', 'latest']
+        wc: ['8.9.0', 'latest']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, zip
+          tools: composer:v2
+
+      - name: Install WP-CLI
+        run: |
+          curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp-cli.phar
+          sudo mv wp-cli.phar /usr/local/bin/wp
+
+      - name: Scaffold WordPress test site
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -e
+          mkdir -p wp && cd wp
+          wp core download --allow-root --version=${{ matrix.wp == 'latest' && 'latest' || matrix.wp }}
+          wp config create --allow-root \
+            --dbname=wordpress_test \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=127.0.0.1 \
+            --skip-check
+          wp core install --allow-root \
+            --url=http://localhost \
+            --title="FPS CI" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.test \
+            --skip-email
+
+      - name: Install WooCommerce
+        working-directory: ${{ runner.temp }}/wp
+        run: |
+          set -e
+          if [ "${{ matrix.wc }}" = "latest" ]; then
+            wp plugin install woocommerce --activate --allow-root
+          else
+            wp plugin install woocommerce --version=${{ matrix.wc }} --activate --allow-root
+          fi
+
+      - name: Enable HPOS
+        working-directory: ${{ runner.temp }}/wp
+        run: |
+          wp option update woocommerce_custom_orders_table_enabled yes --allow-root || true
+          wp option update woocommerce_feature_custom_order_tables_enabled yes --allow-root || true
+
+      - name: Install plugin under test
+        working-directory: ${{ runner.temp }}/wp
+        run: |
+          set -e
+          # Symlink checked-out plugin into wp-content/plugins
+          ln -s "$GITHUB_WORKSPACE/formula-price-sync" wp-content/plugins/formula-price-sync
+          wp plugin activate formula-price-sync --allow-root
+
+      - name: Prepare real E2E license state
+        working-directory: ${{ runner.temp }}/wp
+        run: |
+          wp eval '\update_option("fps_license_status", "valid", false); \set_transient("fps_license_validation", array("valid"=>true,"time"=>time(),"expires_at"=>time()+DAY_IN_SECONDS), DAY_IN_SECONDS);' --allow-root
+
+      - name: Run real WP/WC/HPOS E2E
+        working-directory: ${{ runner.temp }}/wp
+        run: |
+          set -e
+          wp eval-file wp-content/plugins/formula-price-sync/tests/Integration/real-wp-wc-hpos-e2e.php prepare --allow-root
+          wp action-scheduler run --hooks=fps_process_queue_continuation --group=fps-price-sync --force --allow-root
+          wp eval-file wp-content/plugins/formula-price-sync/tests/Integration/real-wp-wc-hpos-e2e.php verify --allow-root
+
+      - name: Run local smoke automation
+        working-directory: ${{ runner.temp }}/wp
+        env:
+          FPS_SKIP_PHPUNIT: '0'
+          FPS_SKIP_SYNC: '1'
+          FPS_ALLOW_ROOT: '1'
+        run: |
+          set -e
+          chmod +x wp-content/plugins/formula-price-sync/bin/run-smoke-local.sh
+          wp-content/plugins/formula-price-sync/bin/run-smoke-local.sh \
+            --path="$(pwd)" \
+            --allow-root \
+            --skip-sync
