@@ -28,6 +28,10 @@ on:
         default: 'false'
         type: boolean
 
+defaults:
+  run:
+    working-directory: ./formula-price-sync
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -311,7 +315,7 @@ jobs:
         run: |
           set -e
           # Symlink checked-out plugin into wp-content/plugins
-          ln -s "$GITHUB_WORKSPACE" wp-content/plugins/formula-price-sync
+          ln -s "$GITHUB_WORKSPACE/formula-price-sync" wp-content/plugins/formula-price-sync
           wp plugin activate formula-price-sync --allow-root
 
       - name: Prepare real E2E license state
