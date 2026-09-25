@@ -44,6 +44,9 @@ jobs:
       - name: Validate Composer
         run: composer validate --strict
 
+      - name: Allow Composer installer plugin
+        run: composer config --global --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
