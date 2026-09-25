@@ -1,0 +1,59 @@
+name: Formula Price Sync PHPUnit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'formula-price-sync/**'
+      - '.github/workflows/formula-price-sync-phpunit.yml'
+  pull_request:
+    paths:
+      - 'formula-price-sync/**'
+      - '.github/workflows/formula-price-sync-phpunit.yml'
+
+jobs:
+  phpunit:
+    name: PHPUnit on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - '7.4'
+          - '8.2'
+
+    defaults:
+      run:
+        working-directory: formula-price-sync
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathai/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, dom, json
+          coverage: none
+          tools: composer:v2
+          ini-values: error_reporting=-1,display_errors=1
+
+      - name: Validate Composer
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run Atomic Option Lock tests
+        run: |
+          vendor/bin/phpunit \
+            --configuration phpunit.xml.dist \
+            --filter AtomicOptionLockTest
+
+      - name: Run full PHPUnit suite
+        run: |
+          vendor/bin/phpunit \
+            --configuration phpunit.xml.dist
