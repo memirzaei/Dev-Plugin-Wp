@@ -9,7 +9,7 @@ This directory contains the automated test harness required by the redevelopment
 ```
 tests/
 ├── bootstrap/
-│   └── bootstrap.php          # Lightweight WP stubs + option/transient store
+│   └── bootstrap.php          # Lightweight WP stubs + option/transient/post-meta store
 ├── Unit/
 │   ├── AtomicOptionLockTest.php
 │   ├── CalculatorTest.php
@@ -19,6 +19,13 @@ tests/
 ├── Integration/
 │   ├── FailureSemanticsTest.php
 │   └── ProcessChunkLicenseGateTest.php
+├── e2e/
+│   ├── admin-login.spec.ts
+│   ├── plugin-menu.spec.ts
+│   └── plugin-settings.spec.ts
+├── playwright.config.ts
+├── run-smoke.php
+├── smoke-install-hpos.php
 └── README.md
 ```
 
@@ -33,11 +40,11 @@ tests/
 
 ### Running the tests
 
-#### Preferred (with PHPUnit + Composer)
+#### PHPUnit
 
 ```bash
 # From the plugin root
-composer require --dev phpunit/phpunit:^9.6 brain/monkey:^2.6
+composer install --dev
 ./vendor/bin/phpunit --configuration phpunit.xml.dist
 ```
 
@@ -67,6 +74,24 @@ php -l tests/Integration/*.php
 - [x] Unit tests for Zhaket_Guard (fail-closed / rate-limit / masking / revalidate)
 - [x] Integration assertion that `process_chunk` exits early when license blocks
 
+
+#### Playwright E2E
+
+The browser suite targets a real WordPress + WooCommerce test site and is kept outside the release package.
+
+```bash
+# From the plugin root
+npm install
+npx playwright install
+npm run test:e2e
+```
+
+Configured specs:
+- `tests/e2e/admin-login.spec.ts`
+- `tests/e2e/plugin-menu.spec.ts`
+- `tests/e2e/plugin-settings.spec.ts`
+
+`playwright.config.ts` is development-only and must never appear in the marketplace ZIP.
 
 ### Concurrency / MySQL integration
 

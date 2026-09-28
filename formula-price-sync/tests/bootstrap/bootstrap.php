@@ -39,12 +39,14 @@ $GLOBALS['fps_test_options']           = array();
 $GLOBALS['fps_test_transients']        = array();
 $GLOBALS['fps_test_filters']           = array();
 $GLOBALS['fps_test_scheduled_actions'] = array();
+$GLOBALS['fps_test_postmeta']           = array();
 
 function fps_test_reset_state(): void {
 	$GLOBALS['fps_test_options']           = array();
 	$GLOBALS['fps_test_transients']        = array();
 	$GLOBALS['fps_test_filters']           = array();
 	$GLOBALS['fps_test_scheduled_actions'] = array();
+	$GLOBALS['fps_test_postmeta']           = array();
 }
 
 if ( ! function_exists( 'get_option' ) ) {
@@ -52,6 +54,59 @@ if ( ! function_exists( 'get_option' ) ) {
 		return array_key_exists( $option, $GLOBALS['fps_test_options'] )
 			? $GLOBALS['fps_test_options'][ $option ]
 			: $default;
+	}
+}
+
+if ( ! function_exists( 'get_post_meta' ) ) {
+	function get_post_meta( $post_id, $key = '', $single = false ) {
+		$post_id = (int) $post_id;
+		if ( '' === $key ) {
+			return $GLOBALS['fps_test_postmeta'][ $post_id ] ?? array();
+		}
+		$value = $GLOBALS['fps_test_postmeta'][ $post_id ][ $key ] ?? array();
+		if ( $single ) {
+			return is_array( $value ) ? ( $value[0] ?? '' ) : $value;
+		}
+		return is_array( $value ) ? $value : array( $value );
+	}
+}
+if ( ! function_exists( 'add_post_meta' ) ) {
+	function add_post_meta( $post_id, $meta_key, $meta_value, $unique = false ) {
+		$post_id = (int) $post_id;
+		if ( ! isset( $GLOBALS['fps_test_postmeta'][ $post_id ] ) ) {
+			$GLOBALS['fps_test_postmeta'][ $post_id ] = array();
+		}
+		$current = $GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] ?? array();
+		if ( $unique && ! empty( $current ) ) {
+			return false;
+		}
+		$GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ][] = $meta_value;
+		return true;
+	}
+}
+if ( ! function_exists( 'update_post_meta' ) ) {
+	function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) {
+		$post_id = (int) $post_id;
+		if ( ! isset( $GLOBALS['fps_test_postmeta'][ $post_id ] ) ) {
+			$GLOBALS['fps_test_postmeta'][ $post_id ] = array();
+		}
+		$GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] = array( $meta_value );
+		return true;
+	}
+}
+if ( ! function_exists( 'delete_post_meta' ) ) {
+	function delete_post_meta( $post_id, $meta_key, $meta_value = '' ) {
+		$post_id = (int) $post_id;
+		if ( ! isset( $GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] ) ) {
+			return false;
+		}
+		unset( $GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] );
+		return true;
+	}
+}
+if ( ! function_exists( 'metadata_exists' ) ) {
+	function metadata_exists( $meta_type, $object_id, $meta_key ) {
+		return ! empty( $GLOBALS['fps_test_postmeta'][ (int) $object_id ][ $meta_key ] );
 	}
 }
 if ( ! function_exists( 'update_option' ) ) {
@@ -148,7 +203,11 @@ if ( ! function_exists( 'remove_all_filters' ) ) {
 }
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-		return add_filter( $tag, $function_to_add, $priority, $accepted_args );
+		$result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
+		if ( isset( $GLOBALS['fps_test_actions'] ) && is_array( $GLOBALS['fps_test_actions'] ) ) {
+			$GLOBALS['fps_test_actions'][ $tag ][] = $function_to_add;
+		}
+		return $result;
 	}
 }
 if ( ! function_exists( 'do_action' ) ) {
@@ -380,6 +439,42 @@ if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_next_scheduled' ) ) {
+	function wp_next_scheduled( $hook, $args = array() ) {
+		foreach ( $GLOBALS['fps_test_scheduled_actions'] as $action ) {
+			if ( $action['hook'] === $hook ) {
+				return $action['timestamp'];
+			}
+		}
+		return false;
+	}
+}
+if ( ! function_exists( 'wp_schedule_event' ) ) {
+	function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array(), $wp_error = false ) {
+		$GLOBALS['fps_test_scheduled_actions'][] = array(
+			'timestamp'  => $timestamp,
+			'hook'       => $hook,
+			'args'       => $args,
+			'group'      => 'wp-cron',
+			'recurrence' => $recurrence,
+		);
+		return true;
+	}
+}
+if ( ! function_exists( 'wp_clear_scheduled_hook' ) ) {
+	function wp_clear_scheduled_hook( $hook, $args = array(), $wp_error = false ) {
+		$GLOBALS['fps_test_scheduled_actions'] = array_values(
+			array_filter(
+				$GLOBALS['fps_test_scheduled_actions'],
+				static function ( $a ) use ( $hook ) {
+					return $a['hook'] !== $hook;
+				}
+			)
+		);
+		return 1;
+	}
+}
+
 class FPS_Test_wpdb {
 	public $options            = 'wp_options';
 	public $posts              = 'wp_posts';
@@ -389,8 +484,12 @@ class FPS_Test_wpdb {
 	public $prefix             = 'wp_';
 	public $last_query         = '';
 	public $last_error         = '';
+	public $cas_failures       = 0;
 
 	public function prepare( $query, ...$args ) {
+		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
 		$i = 0;
 		return preg_replace_callback(
 			'/%[sdf]/',
@@ -417,6 +516,7 @@ class FPS_Test_wpdb {
 				$GLOBALS['fps_test_options'][ $key ] = maybe_unserialize( $new_val );
 				return 1;
 			}
+			++$this->cas_failures;
 			return 0;
 		}
 		if ( preg_match( "/DELETE\s+FROM\s+{$this->options}\s+WHERE\s+option_name\s*=\s*'(.*?)'\s+AND\s+option_value\s*=\s*'(.*?)'/s", $sql, $m ) ) {
@@ -467,6 +567,10 @@ class FPS_Test_wpdb {
 	public function esc_like( $text ) {
 		return addcslashes( (string) $text, "_%%\\" );
 	}
+	public function get_charset_collate() {
+		return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+	}
+
 	public $query_count = 0;
 }
 
