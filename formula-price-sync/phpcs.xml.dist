@@ -11,35 +11,23 @@
     <rule ref="WordPress-Core"/>
     <rule ref="WordPress-Extra"/>
 
-    <!-- Release gate: keep security and SQL correctness blocking; suppress legacy style-only noise
-         from the existing production tree so this gate reflects actionable defects. -->
-    <exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
-    <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
-    <exclude name="Generic.Formatting.DisallowMultipleStatements"/>
-    <exclude name="Universal.WhiteSpace.CommaSpacing"/>
-    <exclude name="Universal.Operators.DisallowShortTernary"/>
-    <exclude name="Universal.Operators.DisallowStandalonePostIncrementDecrement"/>
-    <exclude name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned"/>
-    <exclude name="WordPress.Arrays.ArrayDeclarationSpacing"/>
+    <!-- Release gate: keep security and SQL correctness blocking; suppress only observed style-only noise. -->
+    <exclude name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed"/>
+    <exclude name="WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound"/>
+    <exclude name="Universal.WhiteSpace.CommaSpacing.NoSpaceAfter"/>
     <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
     <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
-    <exclude name="PEAR.Functions.FunctionCallSignature"/>
-    <exclude name="Squiz.ControlStructures.ControlSignature"/>
-    <exclude name="Squiz.Operators.IncrementDecrementUsage"/>
-    <exclude name="Squiz.Strings.DoubleQuoteUsage"/>
-    <exclude name="PSR2.Files.EndFileNewline"/>
-    <exclude name="WordPress.WhiteSpace.OperatorSpacing"/>
-    <exclude name="Squiz.PHP.DisallowMultipleAssignments"/>
-    <exclude name="WordPress.WhiteSpace.ControlStructureSpacing"/>
-    <exclude name="WordPress.Arrays.CommaAfterLast"/>
-    <exclude name="Generic.ControlStructures.InlineControlStructure"/>
-    <exclude name="Generic.NamingConventions.UpperCaseConstantName"/>
-    <exclude name="PEAR.Functions.FunctionDeclaration"/>
-    <exclude name="PSR2.Classes.PropertyDeclaration"/>
-    <exclude name="PSR2.Methods.MethodDeclaration"/>
-    <exclude name="Squiz.Functions.MultiLineFunctionDeclaration"/>
-    <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing"/>
-    <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing"/>
+    <exclude name="Generic.Formatting.DisallowMultipleStatements.SameLine"/>
+    <exclude name="Universal.Operators.DisallowShortTernary.Found"/>
+    <exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket"/>
+    <exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine"/>
+    <exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments"/>
+    <exclude name="PEAR.Functions.FunctionCallSignature.Indent"/>
+    <exclude name="Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace"/>
+    <exclude name="Squiz.PHP.DisallowMultipleAssignments.Found"/>
+    <exclude name="PSR2.Files.EndFileNewline.NoneFound"/>
+    <exclude name="Squiz.Operators.IncrementDecrementUsage.Found"/>
+    <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore"/>
     <exclude-pattern>/vendor/*</exclude-pattern>
     <exclude-pattern>/tests/*</exclude-pattern>
     <exclude-pattern>/languages/*</exclude-pattern>
