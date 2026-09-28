@@ -118,3 +118,8 @@ FPS_INTEGRATION_MYSQL=1 ./vendor/bin/phpunit --group mysql
 
 The `test_pcntl_parallel_acquire_against_shared_store` test is skipped unless
 `FPS_INTEGRATION_MYSQL=1` is set, because child processes need a shared database.
+
+
+### Release-prep CI gate
+
+The `release/**` branch class runs the full CI pipeline, including real MySQL CAS and real WordPress/WooCommerce/HPOS integration. This branch is a validation branch only; it is not the marketplace release branch.
