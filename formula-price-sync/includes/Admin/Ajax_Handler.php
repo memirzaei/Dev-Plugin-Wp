@@ -125,6 +125,7 @@ class Ajax_Handler {
 		$limit = isset( $_POST['limit'] ) ? min( 50, max( 1, absint( $_POST['limit'] ) ) ) : 20;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- {$table} is derived directly from $wpdb->prefix; all external values use prepare placeholders. */
 		$logs = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT l.*, p.post_title AS product_name
@@ -135,6 +136,7 @@ class Ajax_Handler {
 				$limit
 			)
 		);
+		/* phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 
 		$rows = array();
 		foreach ( (array) $logs as $log ) {
