@@ -39,12 +39,14 @@ $GLOBALS['fps_test_options']           = array();
 $GLOBALS['fps_test_transients']        = array();
 $GLOBALS['fps_test_filters']           = array();
 $GLOBALS['fps_test_scheduled_actions'] = array();
+$GLOBALS['fps_test_postmeta']           = array();
 
 function fps_test_reset_state(): void {
 	$GLOBALS['fps_test_options']           = array();
 	$GLOBALS['fps_test_transients']        = array();
 	$GLOBALS['fps_test_filters']           = array();
 	$GLOBALS['fps_test_scheduled_actions'] = array();
+	$GLOBALS['fps_test_postmeta']           = array();
 }
 
 if ( ! function_exists( 'get_option' ) ) {
@@ -52,6 +54,59 @@ if ( ! function_exists( 'get_option' ) ) {
 		return array_key_exists( $option, $GLOBALS['fps_test_options'] )
 			? $GLOBALS['fps_test_options'][ $option ]
 			: $default;
+	}
+}
+
+if ( ! function_exists( 'get_post_meta' ) ) {
+	function get_post_meta( $post_id, $key = '', $single = false ) {
+		$post_id = (int) $post_id;
+		if ( '' === $key ) {
+			return $GLOBALS['fps_test_postmeta'][ $post_id ] ?? array();
+		}
+		$value = $GLOBALS['fps_test_postmeta'][ $post_id ][ $key ] ?? array();
+		if ( $single ) {
+			return is_array( $value ) ? ( $value[0] ?? '' ) : $value;
+		}
+		return is_array( $value ) ? $value : array( $value );
+	}
+}
+if ( ! function_exists( 'add_post_meta' ) ) {
+	function add_post_meta( $post_id, $meta_key, $meta_value, $unique = false ) {
+		$post_id = (int) $post_id;
+		if ( ! isset( $GLOBALS['fps_test_postmeta'][ $post_id ] ) ) {
+			$GLOBALS['fps_test_postmeta'][ $post_id ] = array();
+		}
+		$current = $GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] ?? array();
+		if ( $unique && ! empty( $current ) ) {
+			return false;
+		}
+		$GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ][] = $meta_value;
+		return true;
+	}
+}
+if ( ! function_exists( 'update_post_meta' ) ) {
+	function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) {
+		$post_id = (int) $post_id;
+		if ( ! isset( $GLOBALS['fps_test_postmeta'][ $post_id ] ) ) {
+			$GLOBALS['fps_test_postmeta'][ $post_id ] = array();
+		}
+		$GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] = array( $meta_value );
+		return true;
+	}
+}
+if ( ! function_exists( 'delete_post_meta' ) ) {
+	function delete_post_meta( $post_id, $meta_key, $meta_value = '' ) {
+		$post_id = (int) $post_id;
+		if ( ! isset( $GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] ) ) {
+			return false;
+		}
+		unset( $GLOBALS['fps_test_postmeta'][ $post_id ][ $meta_key ] );
+		return true;
+	}
+}
+if ( ! function_exists( 'metadata_exists' ) ) {
+	function metadata_exists( $meta_type, $object_id, $meta_key ) {
+		return ! empty( $GLOBALS['fps_test_postmeta'][ (int) $object_id ][ $meta_key ] );
 	}
 }
 if ( ! function_exists( 'update_option' ) ) {
