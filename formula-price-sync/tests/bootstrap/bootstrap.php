@@ -467,6 +467,10 @@ class FPS_Test_wpdb {
 	public function esc_like( $text ) {
 		return addcslashes( (string) $text, "_%%\\" );
 	}
+	public function get_charset_collate() {
+		return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+	}
+
 	public $query_count = 0;
 }
 
