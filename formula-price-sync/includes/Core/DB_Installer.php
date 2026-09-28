@@ -221,6 +221,7 @@ class DB_Installer {
 		$inserted = absint( $state['inserted'] ?? 0 );
 
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- the SQL is prepared immediately below; table identifiers are trusted WP-owned identifiers.
 		$sql = "SELECT e.post_id\n			FROM {$wpdb->postmeta} e\n			LEFT JOIN {$wpdb->postmeta} l\n			  ON l.post_id = e.post_id\n			 AND l.meta_key = %s\n			WHERE e.meta_key = %s\n			  AND e.meta_value = %s\n			  AND e.post_id > %d\n			  AND l.post_id IS NULL\n			ORDER BY e.post_id ASC\n			LIMIT %d";
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$ids = $wpdb->get_col( $wpdb->prepare( $sql, '_fps_price_locked', '_fps_enable', 'yes', $next_id, self::MIGRATION_BATCH_SIZE ) );

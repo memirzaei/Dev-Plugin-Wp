@@ -104,12 +104,12 @@ class Product_Columns {
 
 		echo '<div class="fps-col-wrapper">';
 		echo '<div class="fps-col-price">' . esc_html( $formatted ) . '</div>';
-		echo '<div class="fps-col-status">' . Formatter::to_persian_num( wp_kses_post( $status_text ) ) . '</div>';
+		echo '<div class="fps-col-status">' . esc_html( Formatter::to_persian_num( wp_kses_post( $status_text ) ) ) . '</div>';
 		if ( 'yes' === $meta['_fps_enable'] && 'yes' !== $locked ) {
 			echo '<div class="fps-col-badge ' . esc_attr( $status_class ) . '">' . implode( ' ', array_map( 'sanitize_html_class', explode( ' ', $status_text) ) ) . '</div>';
 		}
 		if ( $last_synced_display ) {
-			echo '<div class="fps-col-synced">' . $last_synced_display . '</div>';
+			echo '<div class="fps-col-synced">' . esc_html( $last_synced_display ) . '</div>';
 		}
 		echo '</div>';
 	}

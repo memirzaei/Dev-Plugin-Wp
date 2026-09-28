@@ -639,9 +639,11 @@ class Metaboxes {
 	 * @return void
 	 */
 	private static function save_numeric_meta( int $product_id, string $meta_key, string $post_key ): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the product nonce before this private helper runs.
 		if ( ! isset( $_POST[ $post_key ] ) ) {
 			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the product nonce before this private helper runs.
 		$value = floatval( wp_unslash( $_POST[ $post_key ] ) );
 		$value = max( 0.0, $value );
 		if ( ! is_finite( $value ) ) {
@@ -657,9 +659,11 @@ class Metaboxes {
 	 * @return void
 	 */
 	private static function save_variation_numeric( int $variation_id, int $loop, string $meta_key ): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the variation nonce before this private helper runs.
 		if ( ! isset( $_POST[ $meta_key ][ $loop ] ) ) {
 			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the variation nonce before this private helper runs.
 		$value = floatval( wp_unslash( $_POST[ $meta_key ][ $loop ] ) );
 		$value = max( 0.0, $value );
 		if ( ! is_finite( $value ) ) {

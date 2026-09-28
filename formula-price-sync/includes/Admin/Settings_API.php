@@ -282,7 +282,7 @@ class Settings_API {
 			'<label class="fps-radio-label"><input type="radio" name="%s" value="%s" %s> %s</label>',
 			esc_attr( $args['name'] ),
 			esc_attr( $args['value'] ),
-			$checked,
+			esc_attr( $checked ),
 			esc_html( $args['label'] )
 		);
 	}
@@ -308,7 +308,7 @@ class Settings_API {
 		printf(
 			'<label class="fps-checkbox-label"><input type="checkbox" name="%s" value="1" %s> %s</label>',
 			esc_attr( $args['name'] ),
-			$checked,
+			esc_attr( $checked ),
 			esc_html( $args['label'] )
 		);
 	}
@@ -323,7 +323,7 @@ class Settings_API {
 		echo '<select name="fps_options[update_schedule]">';
 		foreach ( $choices as $val => $label ) {
 			$sel = selected( $options['update_schedule'], $val, false );
-			echo '<option value="' . esc_attr( $val ) . '"' . $sel . '>' . esc_html( $label ) . '</option>';
+			echo '<option value="' . esc_attr( $val ) . '"' . esc_attr( $sel ) . '>' . esc_html( $label ) . '</option>';
 		}
 		echo '</select>';
 	}
@@ -351,7 +351,7 @@ class Settings_API {
 		<?php foreach ( $levels as $value => $label ) : ?>
 			<label class="fps-radio-label">
 				<input type="radio" name="fps_options[log_level]" value="<?php echo esc_attr( $value ); ?>" <?php checked( $current, $value ); ?>>
-				<?php echo $label; ?>
+				<?php echo esc_html( $label ); ?>
 			</label>
 		<?php endforeach; ?>
 		</fieldset>

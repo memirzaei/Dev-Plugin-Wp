@@ -23,7 +23,7 @@ check 'README version' grep -q "v${EXPECTED_VERSION}" README.md
 check 'changelog version heading' grep -q "^# Formula Price Sync ${EXPECTED_VERSION}" CHANGELOG.md
 check 'build version' grep -q "^VERSION=\"${EXPECTED_VERSION}\"$" bin/build-release.sh
 check 'PHP minimum consistency' grep -q "^Requires PHP: 7.4$" readme.txt && grep -q '"php": ">=7.4"' composer.json
-DOC_FILES=(README.md readme.txt CHANGELOG.md .github/workflows/ci.yml bin/build-release.sh bin/run-smoke-local.sh)
+DOC_FILES=(README.md readme.txt CHANGELOG.md ../.github/workflows/formula-price-sync-ci.yml ../.github/workflows/formula-price-sync-phpunit.yml bin/build-release.sh bin/run-smoke-local.sh)
 check_not_contains 'no release skip instruction' 'FPS_SKIP_TESTS=1|Skip PHPUnit|Optional PHPUnit' "${DOC_FILES[@]}"
 check_not_contains 'no stale stable tag' 'Stable tag: 1\.0\.0|Stable tag 1\.0\.0|Stable tag 1\.1\.1' "${DOC_FILES[@]}"
 check_not_contains 'no engineering candidate bypass' 'FPS_ENGINEERING_CANDIDATE' bin/build-release.sh bin/check-release-reproducibility.sh .github/workflows/ci.yml

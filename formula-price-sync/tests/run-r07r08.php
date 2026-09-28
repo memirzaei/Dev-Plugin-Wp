@@ -21,9 +21,9 @@ t7(\FormulaPriceSync\API\Rate_Snapshot_Store::get_rates($snapshotId)['usd'] === 
 $cursor = new ReflectionMethod(Action_Scheduler_Handler::class, 'get_next_enabled_product_ids');
 $cursor->setAccessible(true);
 $cursor->invoke(null, 5000, array(), 50);
-t7(strpos($GLOBALS['wpdb']->last_query, 'e.post_id > %d') !== false, 'R02 cursor uses post_id > next_id');
+t7(strpos($GLOBALS['wpdb']->last_query, 'e.post_id > 5000') !== false, 'R02 cursor uses post_id > next_id');
 t7(strpos($GLOBALS['wpdb']->last_query, 'ORDER BY e.post_id ASC') !== false, 'R02 cursor is monotonic');
-t7(strpos($GLOBALS['wpdb']->last_query, 'LIMIT %d') !== false, 'R02 query is bounded');
+t7(strpos($GLOBALS['wpdb']->last_query, 'LIMIT 50') !== false, 'R02 query is bounded');
 update_option(\FormulaPriceSync\Licensing\License_Guard::STATUS_OPTION, 'valid', false);
 set_transient(\FormulaPriceSync\Licensing\License_Guard::VALIDATION_TRANSIENT, array('valid'=>true,'expires_at'=>time()+3600), 3600);
 $buildRun = new ReflectionMethod(Action_Scheduler_Handler::class, 'build_continuation_run_id'); $buildRun->setAccessible(true);

@@ -23,7 +23,7 @@ if ( 'prepare' === $mode ) {
     delete_option( 'fps_r17_e2e_cache_purged' );
 
     // CI-only valid license state. No commercial token is used.
-    update_option( '\FormulaPriceSync\Licensing\License_Guard::STATUS_OPTION', 'valid', false );
+    update_option( \FormulaPriceSync\Licensing\License_Guard::STATUS_OPTION, 'valid', false );
     set_transient(
         'fps_license_validation',
         array(

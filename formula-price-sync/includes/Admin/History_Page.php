@@ -298,6 +298,7 @@ class History_Page {
 			$values[] = $last_id;
 			$where_sql = 'WHERE ' . implode( ' AND ', $clauses );
 
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- {$table} is a WP-owned identifier and {$where_sql} contains only prepared clauses. */
 			$sql = $wpdb->prepare(
 				"SELECT id, product_id, variation_id, old_price, new_price, source_rate, snapshot_id, trigger_type, created_at
 				 FROM {$table}
@@ -307,6 +308,7 @@ class History_Page {
 				array_merge( $values, array( $batch_size ) )
 			);
 
+			/* phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared */
 			$results = $wpdb->get_results( $sql, ARRAY_A );
 			if ( empty( $results ) ) {
 				break;
