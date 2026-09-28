@@ -402,8 +402,9 @@ class Action_Scheduler_Handler {
 			$wpdb->esc_like( Rate_Snapshot_Store::REF_PREFIX ) . '%',
 		);
 		$where = implode( ' OR ', array_map( static function ( $part ) { return "option_name LIKE '{$part}'"; }, $like_parts ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- identifiers are WP-owned and $where is assembled exclusively from esc_like()-escaped fixed prefixes.
 		$rows = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE {$where} ORDER BY option_id ASC LIMIT " . self::STATE_CLEANUP_BATCH );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$deleted = 0;
 		foreach ( (array) $rows as $row ) {
 			$name = isset( $row->option_name ) ? (string) $row->option_name : '';
@@ -856,8 +857,10 @@ class Action_Scheduler_Handler {
 		}
 		$sql .= ' ORDER BY e.post_id ASC LIMIT %d';
 		$params[] = $limit;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return array_values( array_filter( array_map( 'absint', (array) $wpdb->get_col( $wpdb->prepare( $sql, $params ) ) ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- dynamic table identifiers are WP-owned; values are bound through prepare().
+		$result = $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		return array_values( array_filter( array_map( 'absint', (array) $result ) ) );
 	}
 
 	public static function get_enabled_product_ids( array $args = array() ): array {
@@ -881,8 +884,9 @@ class Action_Scheduler_Handler {
 			$sql .= " AND EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id WHERE tr.object_id = CASE WHEN p.post_type = 'product_variation' THEN p.post_parent ELSE p.ID END AND (" . implode( ' OR ', $clauses ) . "))";
 		}
 		$sql .= ' ORDER BY e.post_id ASC';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- dynamic table identifiers are WP-owned; values are bound through prepare().
 		$ids = $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		return array_values( array_unique( array_filter( array_map( 'absint', (array) $ids ) ) ) );
 	}
 
@@ -916,8 +920,9 @@ class Action_Scheduler_Handler {
 			$params = array_merge( $params, $tags );
 		}
 		$sql = "SELECT DISTINCT candidate.ID\n			FROM {$wpdb->posts} candidate\n			LEFT JOIN {$wpdb->posts} parent ON parent.ID = candidate.post_parent\n			INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = CASE WHEN candidate.post_type = 'product_variation' THEN parent.ID ELSE candidate.ID END\n			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id\n			WHERE candidate.ID IN ({$placeholders})\n			AND (" . implode( ' OR ', $clauses ) . ')';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- dynamic table identifiers are WP-owned; values are bound through prepare().
 		$matching = array_map( 'absint', (array) $wpdb->get_col( $wpdb->prepare( $sql, $params ) ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$set = array_fill_keys( $matching, true );
 		return array_values( array_filter( $ids, static function ( $id ) use ( $set ) { return isset( $set[ $id ] ); } ) );
 	}
