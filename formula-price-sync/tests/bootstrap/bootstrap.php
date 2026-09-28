@@ -432,6 +432,9 @@ class FPS_Test_wpdb {
 	public $cas_failures       = 0;
 
 	public function prepare( $query, ...$args ) {
+		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
 		$i = 0;
 		return preg_replace_callback(
 			'/%[sdf]/',
