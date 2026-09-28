@@ -86,7 +86,11 @@ class System_Health_Page {
 			</div>
 
 			<div id="fps-health-cards">
-				<?php echo self::build_cards(); ?>
+				<?php
+				// build_cards() escapes all dynamic values and emits controlled internal admin markup.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo self::build_cards();
+				?>
 			</div>
 		</div>
 		<?php
