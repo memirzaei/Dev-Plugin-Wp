@@ -47,6 +47,7 @@ function fps_test_reset_state(): void {
 	$GLOBALS['fps_test_filters']           = array();
 	$GLOBALS['fps_test_scheduled_actions'] = array();
 	$GLOBALS['fps_test_postmeta']           = array();
+	$GLOBALS['fps_test_sql_rows']            = array();
 }
 
 if ( ! function_exists( 'get_option' ) ) {
@@ -485,6 +486,8 @@ class FPS_Test_wpdb {
 	public $last_query         = '';
 	public $last_error         = '';
 	public $cas_failures       = 0;
+	public $col_results        = array();
+	public $result_rows        = array();
 
 	public function prepare( $query, ...$args ) {
 		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
@@ -535,12 +538,12 @@ class FPS_Test_wpdb {
 	public function get_col( $query = null, $x = 0 ) {
 		$this->last_query = (string) $query;
 		$this->query_count++;
-		return array();
+		return $this->col_results;
 	}
 
 	public function get_results( $query = null, $output = OBJECT ) {
 		$this->last_query = (string) $query;
-		return array();
+		return $this->result_rows;
 	}
 
 	public function get_var( $query = null, $x = 0, $y = 0 ) {
@@ -550,7 +553,7 @@ class FPS_Test_wpdb {
 
 	public function get_row( $query = null, $output = OBJECT, $y = 0 ) {
 		$this->last_query = (string) $query;
-		return null;
+		return $this->result_rows[0] ?? null;
 	}
 
 	public function insert( $table, $data, $format = null ) {
