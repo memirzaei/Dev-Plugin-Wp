@@ -70,6 +70,9 @@ jobs:
           php tests/run-r07r08.php
           php tests/run-r09r11r12r13.php
 
+      - name: Allow Composer installer plugin
+        run: composer config --global --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+
       - name: Install Composer dev dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
@@ -103,6 +106,9 @@ jobs:
           extensions: mbstring, xml, dom, json
           tools: composer:v2
           coverage: none
+
+      - name: Allow Composer installer plugin
+        run: composer config --global --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
 
       - name: Install Composer dev dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
@@ -271,7 +277,12 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq rsync zip unzip
-          composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Allow Composer installer plugin
+        run: composer config --global --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+
+      - name: Install build dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Validate and build release package
         env:
