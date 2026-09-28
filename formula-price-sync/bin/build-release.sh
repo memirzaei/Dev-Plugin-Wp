@@ -106,6 +106,7 @@ if command -v rsync >/dev/null 2>&1; then
 		--exclude='node_modules' \
 		--exclude='README.md' \
 		--exclude='tests' \
+		--exclude='tests/e2e' \
 		--exclude='bin' \
 		--exclude='build' \
 		--exclude='phpunit.xml' \
@@ -133,6 +134,9 @@ if command -v rsync >/dev/null 2>&1; then
 		--exclude='webpack.config.js' \
 		--exclude='vite.config.js' \
 		--exclude='tsconfig.json' \
+		--exclude='playwright.config.ts' \
+		--exclude='*.spec.ts' \
+		--exclude='*.ts' \
 		./ "${RELEASE_DIR}/"
 else
 	echo "  → rsync not found; using cp/find fallback."
@@ -151,6 +155,13 @@ echo "  → Production tree copied to ${RELEASE_DIR}"
 # Safety: ensure no accidental development leftovers inside the release tree.
 if [[ -d "${RELEASE_DIR}/tests" ]] || [[ -d "${RELEASE_DIR}/bin" ]] || [[ -f "${RELEASE_DIR}/phpunit.xml.dist" ]]; then
 	echo "ERROR: Development artefacts leaked into release directory." >&2
+	exit 1
+fi
+
+# Fail fast if TypeScript or Playwright configuration reaches the release tree.
+if find "${RELEASE_DIR}" -type f \( -name '*.ts' -o -name 'playwright.config.*' \) -print -quit | grep -q .; then
+	echo "ERROR: TypeScript/Playwright development artefact leaked into release tree." >&2
+	find "${RELEASE_DIR}" -type f \( -name '*.ts' -o -name 'playwright.config.*' \) -print >&2
 	exit 1
 fi
 
