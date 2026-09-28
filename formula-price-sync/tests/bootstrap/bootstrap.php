@@ -148,7 +148,11 @@ if ( ! function_exists( 'remove_all_filters' ) ) {
 }
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-		return add_filter( $tag, $function_to_add, $priority, $accepted_args );
+		$result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
+		if ( isset( $GLOBALS['fps_test_actions'] ) && is_array( $GLOBALS['fps_test_actions'] ) ) {
+			$GLOBALS['fps_test_actions'][ $tag ][] = $function_to_add;
+		}
+		return $result;
 	}
 }
 if ( ! function_exists( 'do_action' ) ) {
@@ -380,6 +384,42 @@ if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_next_scheduled' ) ) {
+	function wp_next_scheduled( $hook, $args = array() ) {
+		foreach ( $GLOBALS['fps_test_scheduled_actions'] as $action ) {
+			if ( $action['hook'] === $hook ) {
+				return $action['timestamp'];
+			}
+		}
+		return false;
+	}
+}
+if ( ! function_exists( 'wp_schedule_event' ) ) {
+	function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array(), $wp_error = false ) {
+		$GLOBALS['fps_test_scheduled_actions'][] = array(
+			'timestamp'  => $timestamp,
+			'hook'       => $hook,
+			'args'       => $args,
+			'group'      => 'wp-cron',
+			'recurrence' => $recurrence,
+		);
+		return true;
+	}
+}
+if ( ! function_exists( 'wp_clear_scheduled_hook' ) ) {
+	function wp_clear_scheduled_hook( $hook, $args = array(), $wp_error = false ) {
+		$GLOBALS['fps_test_scheduled_actions'] = array_values(
+			array_filter(
+				$GLOBALS['fps_test_scheduled_actions'],
+				static function ( $a ) use ( $hook ) {
+					return $a['hook'] !== $hook;
+				}
+			)
+		);
+		return 1;
+	}
+}
+
 class FPS_Test_wpdb {
 	public $options            = 'wp_options';
 	public $posts              = 'wp_posts';
@@ -389,6 +429,7 @@ class FPS_Test_wpdb {
 	public $prefix             = 'wp_';
 	public $last_query         = '';
 	public $last_error         = '';
+	public $cas_failures       = 0;
 
 	public function prepare( $query, ...$args ) {
 		$i = 0;
@@ -417,6 +458,7 @@ class FPS_Test_wpdb {
 				$GLOBALS['fps_test_options'][ $key ] = maybe_unserialize( $new_val );
 				return 1;
 			}
+			++$this->cas_failures;
 			return 0;
 		}
 		if ( preg_match( "/DELETE\s+FROM\s+{$this->options}\s+WHERE\s+option_name\s*=\s*'(.*?)'\s+AND\s+option_value\s*=\s*'(.*?)'/s", $sql, $m ) ) {
