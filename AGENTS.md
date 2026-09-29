@@ -25,3 +25,15 @@ These instructions apply to the Formula Price Sync plugin under formula-price-sy
 - Pricing/rate/calculation safety -> fps-price-safety
 - Release/package readiness -> fps-release-gate
 - Local WordPress/WooCommerce verification -> fps-wamp-runner
+
+
+## Agent Command Center
+Use the canonical runner from the repository root:
+- `.ormula-price-syncinps-agent.ps1 status`
+- `.ormula-price-syncinps-agent.ps1 test`
+- `.ormula-price-syncinps-agent.ps1 smoke`
+- `.ormula-price-syncinps-agent.ps1 wamp`
+- `.ormula-price-syncinps-agent.ps1 gate`
+- `.ormula-price-syncinps-agent.ps1 release-check`
+
+Agents must prefer these commands over inventing alternate local gate sequences. The WAMP command uses the real certification site and the existing `run-wamp-gate.ps1` runner with real integration enabled.
