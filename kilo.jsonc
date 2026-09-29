@@ -1,0 +1,6 @@
+{
+  "instructions": [
+    ".agents/skills/**/*.md",
+    "AGENTS.md"
+  ]
+}
