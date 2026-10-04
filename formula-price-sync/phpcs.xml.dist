@@ -51,6 +51,7 @@
     <exclude-pattern>/build/*</exclude-pattern>
     <exclude-pattern>/node_modules/*</exclude-pattern>
     <exclude-pattern>/\.git/*</exclude-pattern>
+    <exclude-pattern>/\.kilo/*</exclude-pattern>
 
     <file>formula-price-sync.php</file>
     <file>uninstall.php</file>

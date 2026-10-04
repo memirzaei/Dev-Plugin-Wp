@@ -107,11 +107,11 @@ wp --path="$WpPath" plugin status woocommerce
 
 if ($RunRealIntegration) {
     Invoke-Gate "Real WP + WooCommerce + HPOS integration" {
-        wp --path="$WpPath" eval-file tests/Integration/real-wp-wc-hpos-e2e.php prepare
+        wp --path="$WpPath" eval "`$argv=array('prepare'); require '$PluginPath/tests/Integration/real-wp-wc-hpos-e2e.php';"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         wp --path="$WpPath" action-scheduler run --hooks=fps_process_queue_continuation --group=fps-price-sync --force
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        wp --path="$WpPath" eval-file tests/Integration/real-wp-wc-hpos-e2e.php verify
+        wp --path="$WpPath" eval "`$argv=array('verify'); require '$PluginPath/tests/Integration/real-wp-wc-hpos-e2e.php';"
     }
 }
 

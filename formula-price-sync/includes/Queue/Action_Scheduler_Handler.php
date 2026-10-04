@@ -830,6 +830,7 @@ class Action_Scheduler_Handler {
 	 *
 	 *     @type int[] $product_cats Product category term IDs to restrict to.
 	 *     @type int[] $product_tags Product tag term IDs to restrict to.
+	 *     @type int[] $product_ids  Exact product/variation IDs to restrict to.
 	 * }
 	 * @return int[]
 	 */
@@ -839,6 +840,12 @@ class Action_Scheduler_Handler {
 		$limit = min( self::MAX_CHUNK_SIZE, max( 1, $limit ) );
 		$sql = "SELECT DISTINCT e.post_id FROM {$wpdb->postmeta} e INNER JOIN {$wpdb->posts} p ON p.ID = e.post_id LEFT JOIN {$wpdb->postmeta} l ON l.post_id = e.post_id AND l.meta_key = %s AND l.meta_value = %s WHERE e.meta_key = %s AND e.meta_value = %s AND e.post_id > %d AND p.post_type IN ('product','product_variation') AND l.post_id IS NULL";
 		$params = array( '_fps_price_locked', 'yes', '_fps_enable', 'yes', $next_id );
+		$product_ids = isset( $args['product_ids'] ) && is_array( $args['product_ids'] ) ? array_filter( array_map( 'absint', $args['product_ids'] ) ) : array();
+		if ( $product_ids ) {
+			$ph = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
+			$sql .= " AND e.post_id IN ({$ph})";
+			$params = array_merge( $params, $product_ids );
+		}
 		$cats = isset( $args['product_cats'] ) && is_array( $args['product_cats'] ) ? array_filter( array_map( 'absint', $args['product_cats'] ) ) : array();
 		$tags = isset( $args['product_tags'] ) && is_array( $args['product_tags'] ) ? array_filter( array_map( 'absint', $args['product_tags'] ) ) : array();
 		$clauses = array();

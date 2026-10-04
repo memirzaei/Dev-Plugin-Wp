@@ -193,7 +193,7 @@ class Cron_Manager {
 		}
 
 		$token = trim( substr( $header, 7 ) );
-		return ( $token !== '' && strlen( $token ) <= 255 && 1 === preg_match( '/^[A-Za-z0-9._~+\/=:-]+$/', $token ) ) ? $token : '';
+		return ( '' !== $token && strlen( $token ) <= 255 && 1 === preg_match( '/^[A-Za-z0-9._~+\/=:-]+$/', $token ) ) ? $token : '';
 	}
 
 	/** Acquire the cron mutex atomically. Returns owner or empty string. */
@@ -329,5 +329,4 @@ class Cron_Manager {
 	public static function generate_token(): string {
 		return bin2hex( random_bytes( 24 ) );
 	}
-
 }

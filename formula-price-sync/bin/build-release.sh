@@ -97,6 +97,7 @@ if command -v rsync >/dev/null 2>&1; then
 	rsync -a \
 		--exclude='.git' \
 		--exclude='.gitignore' \
+		--exclude='.kilo' \
 		--exclude='.gitattributes' \
 		--exclude='.github' \
 		--exclude='.idea' \
@@ -115,8 +116,9 @@ if command -v rsync >/dev/null 2>&1; then
 		--exclude='composer.json' \
 		--exclude='composer.lock' \
 		--exclude='composer.phar' \
-		--exclude='vendor/bin' \
+		--exclude='vendor' \
 		--exclude='*.log' \
+		--exclude='phpcs-remediation-result.txt' \
 		--exclude='*.swp' \
 		--exclude='*.swo' \
 		--exclude='*~' \
@@ -152,6 +154,47 @@ fi
 
 echo "  → Production tree copied to ${RELEASE_DIR}"
 
+# Build an isolated production-only Composer vendor tree. Never mutate the source vendor/.
+PROD_VENDOR_DIR="${BUILD_DIR}/.composer-prod"
+mkdir -p "${PROD_VENDOR_DIR}"
+
+# This project currently has zero locked production packages. In that case the
+# production vendor needs only Composer's generic ClassLoader plus the plugin's
+# own PSR-4 mapping. Build that tiny tree without touching source vendor/.
+if grep -q '"packages"[[:space:]]*:[[:space:]]*\[\]' "${ROOT_DIR}/composer.lock"; then
+	mkdir -p "${PROD_VENDOR_DIR}/vendor/composer"
+	cp "${ROOT_DIR}/vendor/composer/ClassLoader.php" "${PROD_VENDOR_DIR}/vendor/composer/ClassLoader.php"
+	cp "${ROOT_DIR}/vendor/composer/platform_check.php" "${PROD_VENDOR_DIR}/vendor/composer/platform_check.php"
+	cat > "${PROD_VENDOR_DIR}/vendor/autoload.php" <<'PHP'
+<?php
+
+require_once __DIR__ . '/composer/ClassLoader.php';
+
+$loader = new \Composer\Autoload\ClassLoader();
+$loader->addPsr4('FormulaPriceSync\\', dirname(__DIR__, 2) . '/includes');
+$loader->register(true);
+
+return $loader;
+PHP
+else
+	cp "${ROOT_DIR}/composer.json" "${ROOT_DIR}/composer.lock" "${PROD_VENDOR_DIR}/"
+	(
+		cd "${PROD_VENDOR_DIR}"
+		composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts
+	)
+fi
+
+if [[ ! -f "${PROD_VENDOR_DIR}/vendor/autoload.php" ]]; then
+	echo "ERROR: Production Composer autoload.php was not created." >&2
+	exit 1
+fi
+
+rm -rf "${RELEASE_DIR}/vendor"
+cp -a "${PROD_VENDOR_DIR}/vendor" "${RELEASE_DIR}/vendor"
+rm -rf "${PROD_VENDOR_DIR}"
+
+echo "  → Production-only Composer vendor installed (require-dev excluded)."
+
 # Safety: ensure no accidental development leftovers inside the release tree.
 if [[ -d "${RELEASE_DIR}/tests" ]] || [[ -d "${RELEASE_DIR}/bin" ]] || [[ -f "${RELEASE_DIR}/phpunit.xml.dist" ]]; then
 	echo "ERROR: Development artefacts leaked into release directory." >&2
@@ -179,7 +222,8 @@ find "${RELEASE_DIR}" -type d -exec touch -h -d '2000-01-01 00:00:00 UTC' {} +
 
 cd "${BUILD_DIR}"
 rm -f "${ZIP_PATH}"
-find "${PLUGIN_SLUG}" -type f -print | LC_ALL=C sort | zip -X -D -q "${ZIP_NAME}" -@
+mapfile -t ZIP_FILES < <(find "${PLUGIN_SLUG}" -type f -print | LC_ALL=C sort)
+zip -X -D -q "${ZIP_NAME}" "${ZIP_FILES[@]}"
 
 # Basic integrity check
 if [[ ! -f "${ZIP_PATH}" ]]; then
