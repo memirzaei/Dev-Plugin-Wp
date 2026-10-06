@@ -136,6 +136,10 @@ function fps_init() {
 	\FormulaPriceSync\Core\Cron_Manager::register_option();
 	\FormulaPriceSync\Integrations\Notifier::init();
 
+	// Optional Elementor frontend integration. The manager is safe when Elementor
+	// is absent or inactive and the widget enforces the license gate at render time.
+	\FormulaPriceSync\Frontend\Elementor_Manager::init();
+
 	// --- 4. License gate: blocks business logic, NOT infrastructure. -------
 	if ( \FormulaPriceSync\Licensing\License_Guard::should_block() ) {
 		return;
