@@ -1,0 +1,79 @@
+.fps-rate-table {
+	width: 100%;
+	padding: 20px;
+	border: 1px solid rgba(15, 23, 42, 0.10);
+	border-radius: 16px;
+	background: #ffffff;
+	box-sizing: border-box;
+}
+
+.fps-rate-table--dark {
+	background: #0f172a;
+	color: #f8fafc;
+	border-color: rgba(248, 250, 252, 0.12);
+}
+
+.fps-rate-table__title {
+	margin: 0 0 16px;
+	font-size: 1.1rem;
+	line-height: 1.6;
+}
+
+.fps-rate-table__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 12px;
+}
+
+.fps-rate-table__item {
+	min-width: 0;
+	padding: 12px;
+	border-radius: 12px;
+	background: rgba(15, 23, 42, 0.04);
+}
+
+.fps-rate-table--dark .fps-rate-table__item {
+	background: rgba(248, 250, 252, 0.08);
+}
+
+.fps-rate-table__name,
+.fps-rate-table__value,
+.fps-rate-table__change,
+.fps-rate-table__meta,
+.fps-rate-table__empty {
+	word-break: break-word;
+}
+
+.fps-rate-table__name {
+	font-size: 0.9rem;
+	opacity: 0.75;
+}
+
+.fps-rate-table__value {
+	margin-top: 4px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.fps-rate-table__change {
+	margin-top: 4px;
+	font-size: 0.8rem;
+}
+
+.fps-rate-table__meta,
+.fps-rate-table__empty {
+	margin-top: 16px;
+	font-size: 0.8rem;
+	line-height: 1.7;
+	opacity: 0.75;
+}
+
+@media (max-width: 767px) {
+	.fps-rate-table {
+		padding: 16px;
+	}
+
+	.fps-rate-table__list {
+		grid-template-columns: 1fr 1fr;
+	}
+}
