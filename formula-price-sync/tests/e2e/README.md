@@ -1,11 +1,11 @@
-# Formula Price Sync – Playwright E2E Tests
+# RateMatic – Playwright E2E Tests
 
 ## Prerequisites
 
 - Node.js 18+
 - A running WordPress site with:
   - WooCommerce active
-  - Formula Price Sync plugin active
+  - RateMatic plugin active
   - An administrator account
 
 Recommended local environments:

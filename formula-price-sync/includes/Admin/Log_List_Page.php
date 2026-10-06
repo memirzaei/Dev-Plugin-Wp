@@ -39,6 +39,7 @@ class Log_List_Page {
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- {$table} is derived directly from $wpdb->prefix; external values are bound via prepare(). */
 		$logs = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT l.*, p.post_title AS product_name
@@ -50,6 +51,7 @@ class Log_List_Page {
 				$offset
 			)
 		);
+		/* phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 		?>
 		<div class="wrap fps-admin-wrap">
 			<h1><?php esc_html_e( 'تاریخچه تغییرات قیمت', 'formula-price-sync' ); ?></h1>

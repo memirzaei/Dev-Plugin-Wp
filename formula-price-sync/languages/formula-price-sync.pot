@@ -10,7 +10,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: formula-price-sync\n"
 
-msgid "طلا ارز پرو"
+msgid "نرخ‌ماتیک"
 msgstr ""
 
 msgid "فعال‌سازی قیمت‌گذاری خودکار"

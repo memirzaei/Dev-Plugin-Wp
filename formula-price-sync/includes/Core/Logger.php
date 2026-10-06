@@ -1,6 +1,6 @@
 <?php
 /**
- * Centralized Logger for Formula Price Sync.
+ * Centralized Logger for RateMatic.
  *
  * Provides structured logging with configurable levels and output.
  *

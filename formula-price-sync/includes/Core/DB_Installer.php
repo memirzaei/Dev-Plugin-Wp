@@ -53,10 +53,6 @@ class DB_Installer {
 		self::create_tables();
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION, false );
 		// Ensure Action Scheduler tables exist if the library is available.
-		if ( function_exists( 'action_scheduler_register_post_type' ) ) {
-			// Action Scheduler is already bootstrapped by WooCommerce in most installs.
-		}
-
 		self::initialize_lock_meta_migration();
 		self::schedule_migration_batch( 1 );
 	}
@@ -221,8 +217,9 @@ class DB_Installer {
 		$inserted = absint( $state['inserted'] ?? 0 );
 
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- the SQL is prepared immediately below; table identifiers are trusted WP-owned identifiers.
 		$sql = "SELECT e.post_id\n			FROM {$wpdb->postmeta} e\n			LEFT JOIN {$wpdb->postmeta} l\n			  ON l.post_id = e.post_id\n			 AND l.meta_key = %s\n			WHERE e.meta_key = %s\n			  AND e.meta_value = %s\n			  AND e.post_id > %d\n			  AND l.post_id IS NULL\n			ORDER BY e.post_id ASC\n			LIMIT %d";
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$ids = $wpdb->get_col( $wpdb->prepare( $sql, '_fps_price_locked', '_fps_enable', 'yes', $next_id, self::MIGRATION_BATCH_SIZE ) );
 
 		if ( empty( $ids ) ) {

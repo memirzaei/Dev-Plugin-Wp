@@ -5,7 +5,7 @@ import { loginAsAdmin, goToPluginPage, FPS, assertNoAdminError } from './helpers
  * Settings page (admin.php?page=fps-settings)
  * Covers: form presence, display unit, schedule, license field, save.
  */
-test.describe('Formula Price Sync – Settings Page', () => {
+test.describe('RateMatic – Settings Page', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await goToPluginPage(page, FPS.settings);

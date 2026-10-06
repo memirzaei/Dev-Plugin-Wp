@@ -1,5 +1,5 @@
 /**
- * Formula Price Sync – Admin JS
+ * RateMatic – Admin JS
  * Dynamic gold vs currency fields + live Rial preview + bulk sync.
  */
 (function ($) {

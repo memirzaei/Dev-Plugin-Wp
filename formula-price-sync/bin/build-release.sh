@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Formula Price Sync – Marketplace Release Builder
+# RateMatic – Marketplace Release Builder
 # ==============================================================================
 # Produces a clean, deterministic zip ready for upload to Zhaket / Rastchin.
 #
@@ -30,13 +30,13 @@ VERSION="2.0.0"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
 RELEASE_DIR="${BUILD_DIR}/${PLUGIN_SLUG}"
-ZIP_NAME="${PLUGIN_SLUG}-${VERSION}.zip"
+ZIP_NAME="ratematic-${VERSION}-RC2.zip"
 ZIP_PATH="${BUILD_DIR}/${ZIP_NAME}"
 
 cd "${ROOT_DIR}"
 
 echo "--------------------------------------------------"
-echo " Formula Price Sync – Release Builder"
+echo " RateMatic – Release Builder"
 echo " Version : ${VERSION}"
 echo " Root    : ${ROOT_DIR}"
 if [[ -n "${FPS_ZHAKET_PRODUCT_TOKEN:-}" ]]; then
@@ -97,6 +97,7 @@ if command -v rsync >/dev/null 2>&1; then
 	rsync -a \
 		--exclude='.git' \
 		--exclude='.gitignore' \
+		--exclude='.kilo' \
 		--exclude='.gitattributes' \
 		--exclude='.github' \
 		--exclude='.idea' \
@@ -106,6 +107,7 @@ if command -v rsync >/dev/null 2>&1; then
 		--exclude='node_modules' \
 		--exclude='README.md' \
 		--exclude='tests' \
+		--exclude='tests/e2e' \
 		--exclude='bin' \
 		--exclude='build' \
 		--exclude='phpunit.xml' \
@@ -114,8 +116,9 @@ if command -v rsync >/dev/null 2>&1; then
 		--exclude='composer.json' \
 		--exclude='composer.lock' \
 		--exclude='composer.phar' \
-		--exclude='vendor/bin' \
+		--exclude='vendor' \
 		--exclude='*.log' \
+		--exclude='phpcs-remediation-result.txt' \
 		--exclude='*.swp' \
 		--exclude='*.swo' \
 		--exclude='*~' \
@@ -133,6 +136,9 @@ if command -v rsync >/dev/null 2>&1; then
 		--exclude='webpack.config.js' \
 		--exclude='vite.config.js' \
 		--exclude='tsconfig.json' \
+		--exclude='playwright.config.ts' \
+		--exclude='*.spec.ts' \
+		--exclude='*.ts' \
 		./ "${RELEASE_DIR}/"
 else
 	echo "  → rsync not found; using cp/find fallback."
@@ -148,9 +154,42 @@ fi
 
 echo "  → Production tree copied to ${RELEASE_DIR}"
 
+# Build an isolated production-only Composer vendor tree. Never mutate the source vendor.
+# Always let Composer generate the production autoloader. A hand-written
+# ClassLoader.php/autoload.php pair is unsafe when WordPress/WP-CLI has already
+# loaded Composer's ClassLoader in the same PHP process.
+PROD_VENDOR_DIR="${BUILD_DIR}/.composer-prod"
+mkdir -p "${PROD_VENDOR_DIR}"
+
+cp "${ROOT_DIR}/composer.json" "${ROOT_DIR}/composer.lock" "${PROD_VENDOR_DIR}/"
+cp -a "${ROOT_DIR}/includes" "${PROD_VENDOR_DIR}/includes"
+
+(
+	cd "${PROD_VENDOR_DIR}"
+	composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --no-plugins
+)
+
+if [[ ! -f "${PROD_VENDOR_DIR}/vendor/autoload.php" ]]; then
+	echo "ERROR: Production Composer autoload.php was not created." >&2
+	exit 1
+fi
+
+rm -rf "${RELEASE_DIR}/vendor"
+cp -a "${PROD_VENDOR_DIR}/vendor" "${RELEASE_DIR}/vendor"
+rm -rf "${PROD_VENDOR_DIR}"
+
+echo "  → Production-only Composer vendor installed (require-dev excluded)."
+
 # Safety: ensure no accidental development leftovers inside the release tree.
 if [[ -d "${RELEASE_DIR}/tests" ]] || [[ -d "${RELEASE_DIR}/bin" ]] || [[ -f "${RELEASE_DIR}/phpunit.xml.dist" ]]; then
 	echo "ERROR: Development artefacts leaked into release directory." >&2
+	exit 1
+fi
+
+# Fail fast if TypeScript or Playwright configuration reaches the release tree.
+if find "${RELEASE_DIR}" -type f \( -name '*.ts' -o -name 'playwright.config.*' \) -print -quit | grep -q .; then
+	echo "ERROR: TypeScript/Playwright development artefact leaked into release tree." >&2
+	find "${RELEASE_DIR}" -type f \( -name '*.ts' -o -name 'playwright.config.*' \) -print >&2
 	exit 1
 fi
 
@@ -168,7 +207,8 @@ find "${RELEASE_DIR}" -type d -exec touch -h -d '2000-01-01 00:00:00 UTC' {} +
 
 cd "${BUILD_DIR}"
 rm -f "${ZIP_PATH}"
-find "${PLUGIN_SLUG}" -type f -print | LC_ALL=C sort | zip -X -D -q "${ZIP_NAME}" -@
+mapfile -t ZIP_FILES < <(find "${PLUGIN_SLUG}" -type f -print | LC_ALL=C sort)
+zip -X -D -q "${ZIP_NAME}" "${ZIP_FILES[@]}"
 
 # Basic integrity check
 if [[ ! -f "${ZIP_PATH}" ]]; then

@@ -29,7 +29,7 @@ function smoke( bool $ok, string $msg ): void {
 	}
 }
 
-echo "=== Formula Price Sync – Smoke Install (WP + WC + HPOS) ===\n\n";
+echo "=== RateMatic – Smoke Install (WP + WC + HPOS) ===\n\n";
 
 // --------------------------------------------------------------------------
 // 1. Minimal WordPress environment

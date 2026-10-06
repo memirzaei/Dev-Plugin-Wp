@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Formula Price Sync / طلا ارز پرو
+ * Plugin Name: RateMatic / نرخ‌ماتیک
  * Plugin URI:  https://webgraphx.ir
  * Description: قیمت‌گذاری خودکار محصولات ووکامرس بر اساس نرخ ارز، طلا و فرمول‌های سفارشی – با پشتیبانی از محصولات ساده و متغیر، Circuit Breaker و لاگ تغییرات قیمت.
  * Version:     2.0.0
@@ -45,7 +45,7 @@ if ( ! file_exists( $fps_autoload ) ) {
 			}
 			echo '<div class="notice notice-error"><p>';
 			echo esc_html__(
-				'طلا ارز پرو: فایل vendor/autoload.php یافت نشد. لطفاً composer install را اجرا کنید یا از بسته انتشار رسمی استفاده کنید.',
+				'نرخ‌ماتیک: فایل vendor/autoload.php یافت نشد. لطفاً composer install را اجرا کنید یا از بسته انتشار رسمی استفاده کنید.',
 				'formula-price-sync'
 			);
 			echo '</p></div>';
@@ -161,7 +161,7 @@ function fps_woocommerce_missing_notice() {
 		<p>
 			<?php
 			echo esc_html__(
-				'افزونه طلا ارز پرو (Formula Price Sync) نیاز به نصب و فعال بودن ووکامرس دارد.',
+				'افزونه نرخ‌ماتیک (RateMatic) نیاز به نصب و فعال بودن ووکامرس دارد.',
 				'formula-price-sync'
 			);
 			?>

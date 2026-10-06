@@ -1,6 +1,6 @@
 <?php
 /**
- * Notification integrations for Formula Price Sync.
+ * Notification integrations for RateMatic.
  *
  * Sends alerts via Telegram Bot API and Iranian SMS gateways (Kavenegar, FarazSMS)
  * when circuit breaker triggers or other events occur.
@@ -522,9 +522,12 @@ class Notifier {
 		// Backward-compatible entry point. New queue completion is emitted once per run.
 		if ( 'manual' === $trigger_type ) {
 			self::dispatch(
-			sprintf( __( '✅ همگام‌سازی دسته‌ای کامل شد — %d محصول به‌روزرسانی شد.', 'formula-price-sync' ), $updated ),
+			sprintf(
+			// translators: %d is the number of products updated.
+			__( '✅ همگام‌سازی دسته‌ای کامل شد — %d محصول به‌روزرسانی شد.', 'formula-price-sync' ),
+			$updated ),
 			'bulk_sync'
-		);
+			);
 		}
 	}
 
@@ -536,7 +539,8 @@ class Notifier {
 
 		self::dispatch(
 			sprintf(
-				__( '✅ همگام‌سازی دسته‌ای کامل شد — %d محصول به‌روزرسانی شد (%d بخش).', 'formula-price-sync' ),
+			// translators: %1$d is the number of products updated; %2$d is the number of completed chunks.
+				__( '✅ همگام‌سازی دسته‌ای کامل شد — %1$d محصول به‌روزرسانی شد (%2$d بخش).', 'formula-price-sync' ),
 				$updated_total,
 				$total_chunks
 			),

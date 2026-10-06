@@ -402,8 +402,9 @@ class Action_Scheduler_Handler {
 			$wpdb->esc_like( Rate_Snapshot_Store::REF_PREFIX ) . '%',
 		);
 		$where = implode( ' OR ', array_map( static function ( $part ) { return "option_name LIKE '{$part}'"; }, $like_parts ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- identifiers are WP-owned and $where is assembled exclusively from esc_like()-escaped fixed prefixes.
 		$rows = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE {$where} ORDER BY option_id ASC LIMIT " . self::STATE_CLEANUP_BATCH );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$deleted = 0;
 		foreach ( (array) $rows as $row ) {
 			$name = isset( $row->option_name ) ? (string) $row->option_name : '';
@@ -829,6 +830,7 @@ class Action_Scheduler_Handler {
 	 *
 	 *     @type int[] $product_cats Product category term IDs to restrict to.
 	 *     @type int[] $product_tags Product tag term IDs to restrict to.
+	 *     @type int[] $product_ids  Exact product/variation IDs to restrict to.
 	 * }
 	 * @return int[]
 	 */
@@ -838,6 +840,12 @@ class Action_Scheduler_Handler {
 		$limit = min( self::MAX_CHUNK_SIZE, max( 1, $limit ) );
 		$sql = "SELECT DISTINCT e.post_id FROM {$wpdb->postmeta} e INNER JOIN {$wpdb->posts} p ON p.ID = e.post_id LEFT JOIN {$wpdb->postmeta} l ON l.post_id = e.post_id AND l.meta_key = %s AND l.meta_value = %s WHERE e.meta_key = %s AND e.meta_value = %s AND e.post_id > %d AND p.post_type IN ('product','product_variation') AND l.post_id IS NULL";
 		$params = array( '_fps_price_locked', 'yes', '_fps_enable', 'yes', $next_id );
+		$product_ids = isset( $args['product_ids'] ) && is_array( $args['product_ids'] ) ? array_filter( array_map( 'absint', $args['product_ids'] ) ) : array();
+		if ( $product_ids ) {
+			$ph = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
+			$sql .= " AND e.post_id IN ({$ph})";
+			$params = array_merge( $params, $product_ids );
+		}
 		$cats = isset( $args['product_cats'] ) && is_array( $args['product_cats'] ) ? array_filter( array_map( 'absint', $args['product_cats'] ) ) : array();
 		$tags = isset( $args['product_tags'] ) && is_array( $args['product_tags'] ) ? array_filter( array_map( 'absint', $args['product_tags'] ) ) : array();
 		$clauses = array();
@@ -856,8 +864,10 @@ class Action_Scheduler_Handler {
 		}
 		$sql .= ' ORDER BY e.post_id ASC LIMIT %d';
 		$params[] = $limit;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return array_values( array_filter( array_map( 'absint', (array) $wpdb->get_col( $wpdb->prepare( $sql, $params ) ) ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- dynamic table identifiers are WP-owned; values are bound through prepare().
+		$result = $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		return array_values( array_filter( array_map( 'absint', (array) $result ) ) );
 	}
 
 	public static function get_enabled_product_ids( array $args = array() ): array {
@@ -881,8 +891,9 @@ class Action_Scheduler_Handler {
 			$sql .= " AND EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id WHERE tr.object_id = CASE WHEN p.post_type = 'product_variation' THEN p.post_parent ELSE p.ID END AND (" . implode( ' OR ', $clauses ) . "))";
 		}
 		$sql .= ' ORDER BY e.post_id ASC';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- dynamic table identifiers are WP-owned; values are bound through prepare().
 		$ids = $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		return array_values( array_unique( array_filter( array_map( 'absint', (array) $ids ) ) ) );
 	}
 
@@ -916,8 +927,9 @@ class Action_Scheduler_Handler {
 			$params = array_merge( $params, $tags );
 		}
 		$sql = "SELECT DISTINCT candidate.ID\n			FROM {$wpdb->posts} candidate\n			LEFT JOIN {$wpdb->posts} parent ON parent.ID = candidate.post_parent\n			INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = CASE WHEN candidate.post_type = 'product_variation' THEN parent.ID ELSE candidate.ID END\n			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id\n			WHERE candidate.ID IN ({$placeholders})\n			AND (" . implode( ' OR ', $clauses ) . ')';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- dynamic table identifiers are WP-owned; values are bound through prepare().
 		$matching = array_map( 'absint', (array) $wpdb->get_col( $wpdb->prepare( $sql, $params ) ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$set = array_fill_keys( $matching, true );
 		return array_values( array_filter( $ids, static function ( $id ) use ( $set ) { return isset( $set[ $id ] ); } ) );
 	}
@@ -1086,7 +1098,7 @@ class Action_Scheduler_Handler {
 			$rates = '' !== $snapshot_id ? Rate_Snapshot_Store::get_rates( $snapshot_id ) : array();
 
 			if ( empty( $rates ) ) {
-				throw new \RuntimeException( 'Formula Price Sync queue received no valid rates; action must retry.' );
+				throw new \RuntimeException( 'RateMatic queue received no valid rates; action must retry.' );
 			}
 
 			$updated = 0;
@@ -1097,7 +1109,7 @@ class Action_Scheduler_Handler {
 				}
 				if ( 0 === ( (int) $product_index % 5 ) ) {
 					if ( ! self::renew_run_lock( $run_id ) || ! self::renew_chunk_lock( $run_id, $chunk_index, $lock_owner ) ) {
-						throw new \RuntimeException( 'Formula Price Sync queue lock ownership was lost; action must retry.' );
+						throw new \RuntimeException( 'RateMatic queue lock ownership was lost; action must retry.' );
 					}
 				}
 

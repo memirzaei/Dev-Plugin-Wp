@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall Formula Price Sync.
+ * Uninstall RateMatic.
  *
  * @package FormulaPriceSync
  */

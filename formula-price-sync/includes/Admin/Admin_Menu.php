@@ -41,8 +41,8 @@ class Admin_Menu {
 	 */
 	public static function register_menu(): void {
 		add_menu_page(
-			__( 'طلا ارز پرو', 'formula-price-sync' ),
-			__( 'طلا ارز پرو', 'formula-price-sync' ),
+			__( 'نرخ‌ماتیک', 'formula-price-sync' ),
+			__( 'نرخ‌ماتیک', 'formula-price-sync' ),
 			'manage_woocommerce',
 			self::MENU_SLUG,
 			array( __CLASS__, 'render_page' ),
@@ -175,7 +175,7 @@ class Admin_Menu {
 				<div class="fps-logo-icon" aria-hidden="true">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
 				</div>
-				<h1><?php esc_html_e( 'طلا ارز پرو', 'formula-price-sync' ); ?></h1>
+				<h1><?php esc_html_e( 'نرخ‌ماتیک', 'formula-price-sync' ); ?></h1>
 			</div>
 
 			<?php if ( ! $license_valid ) : ?>

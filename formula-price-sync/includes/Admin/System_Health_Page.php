@@ -1,6 +1,6 @@
 <?php
 /**
- * System Health page for Formula Price Sync.
+ * System Health page for RateMatic.
  *
  * @package FormulaPriceSync
  */
@@ -86,7 +86,11 @@ class System_Health_Page {
 			</div>
 
 			<div id="fps-health-cards">
-				<?php echo self::build_cards(); ?>
+				<?php
+				// build_cards() escapes all dynamic values and emits controlled internal admin markup.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo self::build_cards();
+				?>
 			</div>
 		</div>
 		<?php
@@ -608,6 +612,33 @@ class System_Health_Page {
 		<?php
 	}
 
+	/**
+	 * Render latest queue/run health card.
+	 *
+	 * @param array $data Queue health summary.
+	 * @return void
+	 */
+	private static function render_queue_card( array $data ): void {
+		$state = isset( $data['state'] ) ? (string) $data['state'] : '';
+		$known = array( 'completed', 'running', 'queued', 'failed', 'cancelled' );
+		$healthy = 'completed' === $state || ( in_array( $state, array( 'running', 'queued' ), true ) && empty( $data['last_error'] ) );
+		$status_class = $healthy ? 'success' : ( 'failed' === $state ? 'error' : 'warning' );
+		$status_label = 'completed' === $state ? __( 'موفق', 'formula-price-sync' ) : ( 'failed' === $state ? __( 'خطا', 'formula-price-sync' ) : ( in_array( $state, array( 'running', 'queued' ), true ) ? __( 'در حال اجرا', 'formula-price-sync' ) : __( 'بدون داده', 'formula-price-sync' ) ) );
+		$state_label = in_array( $state, $known, true ) ? $state : __( 'نامشخص', 'formula-price-sync' );
+		?>
+		<div class="fps-card">
+			<div class="fps-card-header">
+				<h2><?php esc_html_e( 'وضعیت صف', 'formula-price-sync' ); ?></h2>
+				<span class="fps-pill fps-pill-<?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span>
+			</div>
+			<?php if ( ! empty( $data ) ) : ?>
+				<p class="fps-desc"><?php esc_html_e( 'وضعیت:', 'formula-price-sync' ); ?> <code><?php echo esc_html( $state_label ); ?></code><?php if ( isset( $data['progress'] ) && null !== $data['progress'] ) : ?> <span style="margin-right: var(--fps-gap-sm);"><?php echo esc_html( number_format_i18n( (float) $data['progress'], 2 ) ); ?>%</span><?php endif; ?></p>
+				<p class="fps-desc" style="margin-top: var(--fps-gap-sm);"><strong><?php echo esc_html( number_format_i18n( absint( $data['products_updated'] ?? 0 ) ) ); ?></strong> <?php esc_html_e( 'محصول به‌روزرسانی‌شده', 'formula-price-sync' ); ?> <span style="margin-right: var(--fps-gap-sm);">/ <?php echo esc_html( number_format_i18n( absint( $data['products_seen'] ?? 0 ) ) ); ?> <?php esc_html_e( 'بررسی‌شده', 'formula-price-sync' ); ?></span></p>
+				<?php if ( ! empty( $data['last_error'] ) ) : ?><p class="fps-desc" style="margin-top: var(--fps-gap-sm); color: var(--fps-color-error);"><?php echo esc_html( $data['last_error'] ); ?></p><?php endif; ?>
+			<?php else : ?><p class="fps-desc"><?php esc_html_e( 'هنوز اجرای صفی ثبت نشده است.', 'formula-price-sync' ); ?></p><?php endif; ?>
+		</div>
+		<?php
+	}
 	/**
 	 * Get human-readable label for trigger type.
 	 *

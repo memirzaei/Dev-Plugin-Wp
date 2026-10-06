@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Formula Price Sync – Local Smoke / Integration Test Automation
+# RateMatic – Local Smoke / Integration Test Automation
 # ==============================================================================
 # Runs operational checks against a real WordPress + WooCommerce install
 # using WP-CLI. Designed for Local, Laragon, Docker, or any WP-CLI site.
@@ -115,7 +115,7 @@ wp_cmd() {
 }
 
 echo "=============================================================="
-echo " Formula Price Sync – Local Smoke Automation"
+echo " RateMatic – Local Smoke Automation"
 echo "=============================================================="
 echo " WP-CLI  : ${WP_BIN}"
 echo " WP_PATH : ${WP_PATH:-'(current / default)'}"
@@ -370,7 +370,7 @@ echo "=============================================================="
 
 REPORT_FILE="/tmp/fps-smoke-report-$(date +%Y%m%d-%H%M%S).txt"
 {
-	echo "Formula Price Sync – Local Smoke Report"
+	echo "RateMatic – Local Smoke Report"
 	echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 	echo "WP: ${WP_VER:-unknown}"
 	echo ""

@@ -1,5 +1,5 @@
 /**
- * Formula Price Sync – History page CSV export handler.
+ * RateMatic – History page CSV export handler.
  * Uses fetch + Blob to trigger a native file download.
  */
 (function () {

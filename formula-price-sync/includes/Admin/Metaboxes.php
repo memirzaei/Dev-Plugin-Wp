@@ -123,7 +123,7 @@ class Metaboxes {
 		wp_nonce_field( 'fps_product_meta_save', '_fps_product_nonce' );
 
 		echo '<div class="options_group fps-pricing-fields">';
-		echo '<p class="form-field"><strong>' . esc_html__( 'طلا ارز پرو – قیمت‌گذاری خودکار', 'formula-price-sync' ) . '</strong></p>';
+		echo '<p class="form-field"><strong>' . esc_html__( 'نرخ‌ماتیک – قیمت‌گذاری خودکار', 'formula-price-sync' ) . '</strong></p>';
 
 		$rates = array();
 		try {
@@ -330,7 +330,7 @@ class Metaboxes {
 		$source = get_post_meta( $variation_id, '_fps_source_type', true ) ?: 'gold_18k';
 
 		echo '<div class="fps-variation-pricing-fields" data-loop="' . esc_attr( (string) $loop ) . '">';
-		echo '<p><strong>' . esc_html__( 'طلا ارز پرو – قیمت‌گذاری خودکار (این ورییشن)', 'formula-price-sync' ) . '</strong></p>';
+		echo '<p><strong>' . esc_html__( 'نرخ‌ماتیک – قیمت‌گذاری خودکار (این ورییشن)', 'formula-price-sync' ) . '</strong></p>';
 		echo '<p class="fps-formula-hint fps-var-formula-hint"></p>';
 
 		$enable_value = get_post_meta( $variation_id, '_fps_enable', true );
@@ -639,9 +639,11 @@ class Metaboxes {
 	 * @return void
 	 */
 	private static function save_numeric_meta( int $product_id, string $meta_key, string $post_key ): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the product nonce before this private helper runs.
 		if ( ! isset( $_POST[ $post_key ] ) ) {
 			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the product nonce before this private helper runs.
 		$value = floatval( wp_unslash( $_POST[ $post_key ] ) );
 		$value = max( 0.0, $value );
 		if ( ! is_finite( $value ) ) {
@@ -657,9 +659,11 @@ class Metaboxes {
 	 * @return void
 	 */
 	private static function save_variation_numeric( int $variation_id, int $loop, string $meta_key ): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the variation nonce before this private helper runs.
 		if ( ! isset( $_POST[ $meta_key ][ $loop ] ) ) {
 			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller validates the variation nonce before this private helper runs.
 		$value = floatval( wp_unslash( $_POST[ $meta_key ][ $loop ] ) );
 		$value = max( 0.0, $value );
 		if ( ! is_finite( $value ) ) {

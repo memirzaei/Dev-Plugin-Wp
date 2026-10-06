@@ -50,14 +50,14 @@ class Bulk_Form_Page {
 				</p>
 
 				<select name="fps_bulk_product_cats[]" id="fps-bulk-product-cats" multiple="multiple" data-placeholder="انتخاب دسته‌بندی‌ها" <?php disabled( ! $license_ok ); ?> style="width:100%;">
-					<?php foreach ( $cats as $cat ): ?>
+					<?php foreach ( $cats as $cat ) : ?>
 						<option value="<?php echo esc_attr( (string) $cat->term_id ); ?>"><?php echo esc_html( $cat->name ); ?></option>
 					<?php endforeach; ?>
 				</select>
 
 				<label for="fps-bulk-product-tags" style="display:block;margin-top:14px;font-weight:600;"><?php esc_html_e( 'برچسب‌ها', 'formula-price-sync' ); ?></label>
 				<select name="fps_bulk_product_tags[]" id="fps-bulk-product-tags" multiple="multiple" data-placeholder="انتخاب برچسب‌ها" <?php disabled( ! $license_ok ); ?> style="width:100%;">
-					<?php foreach ( $tags as $tag ): ?>
+					<?php foreach ( $tags as $tag ) : ?>
 						<option value="<?php echo esc_attr( (string) $tag->term_id ); ?>"><?php echo esc_html( $tag->name ); ?></option>
 					<?php endforeach; ?>
 				</select>
@@ -81,12 +81,14 @@ class Bulk_Form_Page {
 		</div>
 
 		<script id="fps-bulk-config" type="application/json">
-			<?php echo wp_json_encode(
+			<?php
+            echo wp_json_encode(
 				array(
 					'nonce'   => wp_create_nonce( 'fps_admin_ajax' ),
 					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				)
-			); ?>
+			);
+            ?>
 		</script>
 		<script type="text/javascript">
 			jQuery(function($){

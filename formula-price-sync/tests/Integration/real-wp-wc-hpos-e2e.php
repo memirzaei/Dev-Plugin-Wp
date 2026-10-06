@@ -23,7 +23,7 @@ if ( 'prepare' === $mode ) {
     delete_option( 'fps_r17_e2e_cache_purged' );
 
     // CI-only valid license state. No commercial token is used.
-    update_option( '\FormulaPriceSync\Licensing\License_Guard::STATUS_OPTION', 'valid', false );
+    update_option( \FormulaPriceSync\Licensing\License_Guard::STATUS_OPTION, 'valid', false );
     set_transient(
         'fps_license_validation',
         array(
@@ -101,7 +101,9 @@ if ( 'prepare' === $mode ) {
         array(
             'run_id'           => $run_id,
             'trigger_type'     => 'e2e',
-            'filters'          => array(),
+            'filters'          => array(
+                'product_ids' => array( $variation_a->get_id(), $variation_b->get_id() ),
+            ),
             'snapshot_id'      => $snapshot_id,
             'next_id'          => 0,
             'state'            => 'queued',
@@ -179,14 +181,14 @@ if ( 'verify' === $mode ) {
     if ( (float) $b->get_price( 'edit' ) !== 200.0 ) {
         throw new RuntimeException( 'Locked variation B mutated unexpectedly: ' . $b->get_price( 'edit' ) );
     }
-    if ( (float) $parent->get_price( 'edit' ) !== 100.0 ) {
-        throw new RuntimeException( 'Parent product mutated unexpectedly: ' . $parent->get_price( 'edit' ) );
+    if ( (float) $parent->get_price( 'edit' ) !== 200.0 ) {
+        throw new RuntimeException( 'Parent variable price expected 200 from locked variation B, got ' . $parent->get_price( 'edit' ) );
     }
 
     global $wpdb;
     $logs = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT product_id, variation_id, old_price, new_price, snapshot_id FROM {$wpdb->prefix}fps_price_logs WHERE product_id = %d ORDER BY id DESC LIMIT 5",
+            "SELECT product_id, variation_id, old_price, new_price, snapshot_id FROM {$wpdb->prefix}fps_price_logs WHERE variation_id = %d ORDER BY id DESC LIMIT 5",
             $a_id
         )
     );
