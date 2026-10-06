@@ -40,7 +40,7 @@ function smoke_assert( bool $condition, string $message ): void {
 	}
 }
 
-echo "=== Formula Price Sync – Smoke Tests ===\n\n";
+echo "=== RateMatic – Smoke Tests ===\n\n";
 
 // ------------------------------------------------------------------
 // Atomic_Option_Lock

@@ -62,7 +62,7 @@ Requirements:
 
 ### 3.1 Elementor_Manager
 - Bootstrap only if Elementor is active
-- Register widget category “طلا ارز پرو”
+- Register widget category “نرخ‌ماتیک”
 
 ### 3.2 Price Ticker Widget (simple)
 - Shows gold 18k + USD rates

@@ -8,11 +8,11 @@ command -v zip >/dev/null || { echo 'zip is required' >&2; exit 1; }
 command -v unzip >/dev/null || { echo 'unzip is required' >&2; exit 1; }
 
 CI=true FPS_RELEASE_REPRO_CHECK=1 FPS_TESTS_ALREADY_PASSED=1 bash bin/build-release.sh
-cp build/formula-price-sync-2.0.0.zip /tmp/fps-release-a.zip
+cp build/ratematic-2.0.0-RC2.zip /tmp/fps-release-a.zip
 sha_a=$(sha256sum /tmp/fps-release-a.zip | awk '{print $1}')
 
 CI=true FPS_RELEASE_REPRO_CHECK=1 FPS_TESTS_ALREADY_PASSED=1 bash bin/build-release.sh
-cp build/formula-price-sync-2.0.0.zip /tmp/fps-release-b.zip
+cp build/ratematic-2.0.0-RC2.zip /tmp/fps-release-b.zip
 sha_b=$(sha256sum /tmp/fps-release-b.zip | awk '{print $1}')
 
 printf 'build-a: %s\nbuild-b: %s\n' "$sha_a" "$sha_b"

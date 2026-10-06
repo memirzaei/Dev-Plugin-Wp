@@ -4,14 +4,14 @@ import { loginAsAdmin, goToPluginPage, FPS, assertNoAdminError } from './helpers
 /**
  * Verify top-level menu and all FPS sub-pages load without fatal errors.
  */
-test.describe('Formula Price Sync – Admin Menu', () => {
+test.describe('RateMatic – Admin Menu', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
   });
 
   test('top-level menu item exists in admin sidebar', async ({ page }) => {
     await page.goto('/wp-admin/', { waitUntil: 'domcontentloaded' });
-    // Menu may be registered as "طلا ارز پرو" or "Formula Price Sync"
+    // Menu may be registered as "نرخ‌ماتیک" or "RateMatic"
     const menu = page.locator(
       '#adminmenu a[href*="page=formula-price-sync"], #adminmenu .wp-menu-name'
     );

@@ -1,4 +1,6 @@
-# Formula Price Sync 2.0.0 — Redevelopment Hardening
+# RateMatic 2.0.0 RC2 — Redevelopment Hardening
+
+- **Brand rename:** Formula Price Sync → RateMatic
 
 - **Post-R17 hardening:** bumped schema version to `2.0.1`; removed the `FPS_ENGINEERING_CANDIDATE` release bypass; added configurable `License_Guard` + `Rastchin_Adapter` server-side licensing; normalized external booleans safely; removed buyer-facing build instructions.
 

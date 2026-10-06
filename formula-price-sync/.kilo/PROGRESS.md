@@ -1,6 +1,6 @@
 # Progress Tracker — Frontend MVP Phase 1
 
-**Project:** Formula Price Sync / طلا ارز پرو  
+**Project:** RateMatic / نرخ‌ماتیک
 **Phase:** Frontend Redevelopment (3-Day MVP)  
 **Started:**  
 **Last Updated:**  

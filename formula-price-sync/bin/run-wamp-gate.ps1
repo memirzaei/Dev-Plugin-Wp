@@ -34,7 +34,7 @@ if ([string]::IsNullOrWhiteSpace($WpPath)) {
 }
 
 if (-not (Test-Path (Join-Path $PluginPath "formula-price-sync.php"))) {
-    throw "Plugin path is not Formula Price Sync: $PluginPath"
+    throw "Plugin path is not RateMatic: $PluginPath"
 }
 if (-not (Test-Path (Join-Path $WpPath "wp-config.php"))) {
     throw "WordPress path does not contain wp-config.php: $WpPath"

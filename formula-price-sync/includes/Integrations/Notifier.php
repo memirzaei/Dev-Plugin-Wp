@@ -1,6 +1,6 @@
 <?php
 /**
- * Notification integrations for Formula Price Sync.
+ * Notification integrations for RateMatic.
  *
  * Sends alerts via Telegram Bot API and Iranian SMS gateways (Kavenegar, FarazSMS)
  * when circuit breaker triggers or other events occur.

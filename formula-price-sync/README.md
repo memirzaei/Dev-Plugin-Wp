@@ -1,4 +1,6 @@
-# Formula Price Sync / طلا ارز پرو — v2.0.0 (Developer Source)
+# RateMatic / نرخ‌ماتیک — v2.0.0 (Developer Source)
+
+Technical project: Formula Price Sync
 
 WooCommerce automated pricing by gold & currency formulas (Iranian guild rules).
 

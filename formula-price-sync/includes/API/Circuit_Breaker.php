@@ -188,7 +188,7 @@ class Circuit_Breaker {
 		?>
 		<div class="notice notice-error is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'طلا ارز پرو – Circuit Breaker', 'formula-price-sync' ); ?>:</strong>
+				<strong><?php esc_html_e( 'نرخ‌ماتیک – Circuit Breaker', 'formula-price-sync' ); ?>:</strong>
 				<?php echo esc_html( $warning['message'] ); ?>
 			</p>
 			<p>

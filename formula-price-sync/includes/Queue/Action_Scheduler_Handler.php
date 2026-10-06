@@ -1098,7 +1098,7 @@ class Action_Scheduler_Handler {
 			$rates = '' !== $snapshot_id ? Rate_Snapshot_Store::get_rates( $snapshot_id ) : array();
 
 			if ( empty( $rates ) ) {
-				throw new \RuntimeException( 'Formula Price Sync queue received no valid rates; action must retry.' );
+				throw new \RuntimeException( 'RateMatic queue received no valid rates; action must retry.' );
 			}
 
 			$updated = 0;
@@ -1109,7 +1109,7 @@ class Action_Scheduler_Handler {
 				}
 				if ( 0 === ( (int) $product_index % 5 ) ) {
 					if ( ! self::renew_run_lock( $run_id ) || ! self::renew_chunk_lock( $run_id, $chunk_index, $lock_owner ) ) {
-						throw new \RuntimeException( 'Formula Price Sync queue lock ownership was lost; action must retry.' );
+						throw new \RuntimeException( 'RateMatic queue lock ownership was lost; action must retry.' );
 					}
 				}
 

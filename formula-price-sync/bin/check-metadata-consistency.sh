@@ -20,7 +20,7 @@ check 'plugin header version' grep -qE "^ \* Version:[[:space:]]+${EXPECTED_VERS
 check 'FPS_VERSION constant' grep -q "define( 'FPS_VERSION', '${EXPECTED_VERSION}'" formula-price-sync.php
 check 'WordPress stable tag' grep -q "^Stable tag: ${EXPECTED_VERSION}$" readme.txt
 check 'README version' grep -q "v${EXPECTED_VERSION}" README.md
-check 'changelog version heading' grep -q "^# Formula Price Sync ${EXPECTED_VERSION}" CHANGELOG.md
+check 'changelog version heading' grep -q "^# RateMatic ${EXPECTED_VERSION}" CHANGELOG.md
 check 'build version' grep -q "^VERSION=\"${EXPECTED_VERSION}\"$" bin/build-release.sh
 check 'PHP minimum consistency' grep -q "^Requires PHP: 7.4$" readme.txt && grep -q '"php": ">=7.4"' composer.json
 DOC_FILES=(README.md readme.txt CHANGELOG.md ../.github/workflows/formula-price-sync-ci.yml ../.github/workflows/formula-price-sync-phpunit.yml bin/build-release.sh bin/run-smoke-local.sh)

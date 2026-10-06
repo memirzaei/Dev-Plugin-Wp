@@ -1,4 +1,4 @@
-# Formula Price Sync – Test Suite
+# RateMatic – Test Suite
 
 ## Overview
 

@@ -2,7 +2,7 @@
   "name": "formula-price-sync",
   "version": "2.0.0",
   "private": true,
-  "description": "Formula Price Sync – WooCommerce gold & currency formula pricing",
+  "description": "RateMatic – WooCommerce gold & currency formula pricing",
   "scripts": {
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",

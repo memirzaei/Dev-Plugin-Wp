@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Formula Price Sync – Marketplace Release Builder
+# RateMatic – Marketplace Release Builder
 # ==============================================================================
 # Produces a clean, deterministic zip ready for upload to Zhaket / Rastchin.
 #
@@ -30,13 +30,13 @@ VERSION="2.0.0"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
 RELEASE_DIR="${BUILD_DIR}/${PLUGIN_SLUG}"
-ZIP_NAME="${PLUGIN_SLUG}-${VERSION}.zip"
+ZIP_NAME="ratematic-${VERSION}-RC2.zip"
 ZIP_PATH="${BUILD_DIR}/${ZIP_NAME}"
 
 cd "${ROOT_DIR}"
 
 echo "--------------------------------------------------"
-echo " Formula Price Sync – Release Builder"
+echo " RateMatic – Release Builder"
 echo " Version : ${VERSION}"
 echo " Root    : ${ROOT_DIR}"
 if [[ -n "${FPS_ZHAKET_PRODUCT_TOKEN:-}" ]]; then
@@ -154,35 +154,20 @@ fi
 
 echo "  → Production tree copied to ${RELEASE_DIR}"
 
-# Build an isolated production-only Composer vendor tree. Never mutate the source vendor/.
+# Build an isolated production-only Composer vendor tree. Never mutate the source vendor.
+# Always let Composer generate the production autoloader. A hand-written
+# ClassLoader.php/autoload.php pair is unsafe when WordPress/WP-CLI has already
+# loaded Composer's ClassLoader in the same PHP process.
 PROD_VENDOR_DIR="${BUILD_DIR}/.composer-prod"
 mkdir -p "${PROD_VENDOR_DIR}"
 
-# This project currently has zero locked production packages. In that case the
-# production vendor needs only Composer's generic ClassLoader plus the plugin's
-# own PSR-4 mapping. Build that tiny tree without touching source vendor/.
-if grep -q '"packages"[[:space:]]*:[[:space:]]*\[\]' "${ROOT_DIR}/composer.lock"; then
-	mkdir -p "${PROD_VENDOR_DIR}/vendor/composer"
-	cp "${ROOT_DIR}/vendor/composer/ClassLoader.php" "${PROD_VENDOR_DIR}/vendor/composer/ClassLoader.php"
-	cp "${ROOT_DIR}/vendor/composer/platform_check.php" "${PROD_VENDOR_DIR}/vendor/composer/platform_check.php"
-	cat > "${PROD_VENDOR_DIR}/vendor/autoload.php" <<'PHP'
-<?php
+cp "${ROOT_DIR}/composer.json" "${ROOT_DIR}/composer.lock" "${PROD_VENDOR_DIR}/"
+cp -a "${ROOT_DIR}/includes" "${PROD_VENDOR_DIR}/includes"
 
-require_once __DIR__ . '/composer/ClassLoader.php';
-
-$loader = new \Composer\Autoload\ClassLoader();
-$loader->addPsr4('FormulaPriceSync\\', dirname(__DIR__, 2) . '/includes');
-$loader->register(true);
-
-return $loader;
-PHP
-else
-	cp "${ROOT_DIR}/composer.json" "${ROOT_DIR}/composer.lock" "${PROD_VENDOR_DIR}/"
-	(
-		cd "${PROD_VENDOR_DIR}"
-		composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts
-	)
-fi
+(
+	cd "${PROD_VENDOR_DIR}"
+	composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --no-plugins
+)
 
 if [[ ! -f "${PROD_VENDOR_DIR}/vendor/autoload.php" ]]; then
 	echo "ERROR: Production Composer autoload.php was not created." >&2

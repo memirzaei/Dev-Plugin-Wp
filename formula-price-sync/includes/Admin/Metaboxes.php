@@ -123,7 +123,7 @@ class Metaboxes {
 		wp_nonce_field( 'fps_product_meta_save', '_fps_product_nonce' );
 
 		echo '<div class="options_group fps-pricing-fields">';
-		echo '<p class="form-field"><strong>' . esc_html__( 'طلا ارز پرو – قیمت‌گذاری خودکار', 'formula-price-sync' ) . '</strong></p>';
+		echo '<p class="form-field"><strong>' . esc_html__( 'نرخ‌ماتیک – قیمت‌گذاری خودکار', 'formula-price-sync' ) . '</strong></p>';
 
 		$rates = array();
 		try {
@@ -330,7 +330,7 @@ class Metaboxes {
 		$source = get_post_meta( $variation_id, '_fps_source_type', true ) ?: 'gold_18k';
 
 		echo '<div class="fps-variation-pricing-fields" data-loop="' . esc_attr( (string) $loop ) . '">';
-		echo '<p><strong>' . esc_html__( 'طلا ارز پرو – قیمت‌گذاری خودکار (این ورییشن)', 'formula-price-sync' ) . '</strong></p>';
+		echo '<p><strong>' . esc_html__( 'نرخ‌ماتیک – قیمت‌گذاری خودکار (این ورییشن)', 'formula-price-sync' ) . '</strong></p>';
 		echo '<p class="fps-formula-hint fps-var-formula-hint"></p>';
 
 		$enable_value = get_post_meta( $variation_id, '_fps_enable', true );

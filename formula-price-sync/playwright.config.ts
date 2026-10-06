@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright config for Formula Price Sync E2E tests.
+ * Playwright config for RateMatic E2E tests.
  *
  * Environment variables (set in .env or CI):
  *   WP_BASE_URL      – WordPress site URL (default: http://localhost:8889)

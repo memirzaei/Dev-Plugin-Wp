@@ -1,6 +1,6 @@
 <?php
 /**
- * Server-side cron manager for Formula Price Sync.
+ * Server-side cron manager for RateMatic.
  *
  * Provides a secure query-var endpoint that server-level crontabs
  * (curl / wget) can hit to trigger background price synchronization,

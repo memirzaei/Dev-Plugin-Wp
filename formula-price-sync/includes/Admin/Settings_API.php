@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings page & API for Formula Price Sync.
+ * Settings page & API for RateMatic.
  *
  * @package FormulaPriceSync
  */

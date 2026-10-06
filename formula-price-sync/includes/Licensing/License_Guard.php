@@ -335,7 +335,7 @@ class License_Guard {
         ?>
         <div class="notice notice-warning">
             <p>
-                <strong><?php esc_html_e( 'طلا ارز پرو', 'formula-price-sync' ); ?>:</strong>
+                <strong><?php esc_html_e( 'نرخ‌ماتیک', 'formula-price-sync' ); ?>:</strong>
                 <?php esc_html_e( 'لایسنس معتبر فعال نیست.', 'formula-price-sync' ); ?>
                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=formula-price-sync' ) ); ?>">
                     <?php esc_html_e( 'فعال‌سازی', 'formula-price-sync' ); ?>

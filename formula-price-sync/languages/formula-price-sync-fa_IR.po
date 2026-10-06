@@ -15,8 +15,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n==0 || n==1);\n"
 "X-Domain: formula-price-sync\n"
 
-msgid "طلا ارز پرو"
-msgstr "طلا ارز پرو"
+msgid "نرخ‌ماتیک"
+msgstr "نرخ‌ماتیک"
 
 msgid "فعال‌سازی قیمت‌گذاری خودکار"
 msgstr "فعال‌سازی قیمت‌گذاری خودکار"
@@ -56,9 +56,6 @@ msgstr "همگام‌سازی دسته‌ای قیمت‌ها"
 
 msgid "شروع همگام‌سازی دسته‌ای"
 msgstr "شروع همگام‌سازی دسته‌ای"
-
-msgid "تنظیمات طلا ارز پرو"
-msgstr "تنظیمات طلا ارز پرو"
 
 msgid "داشبورد"
 msgstr "داشبورد"

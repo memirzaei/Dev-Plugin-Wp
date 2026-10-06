@@ -1,6 +1,6 @@
 <?php
 /**
- * System Health page for Formula Price Sync.
+ * System Health page for RateMatic.
  *
  * @package FormulaPriceSync
  */
